@@ -1,0 +1,129 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <!-- Image Gallery -->
+    <div class="relative h-96">
+      <% if @villa.images.present? %>
+        <% images = @villa.images.split(',') %>
+        <div class="grid grid-cols-<%= images.length %> gap-2 h-full">
+          <% images.each_with_index do |image, index| %>
+            <div class="<%= index == 0 ? 'col-span-2' : '' %> h-full">
+              <%= image_tag image, class: "w-full h-full object-cover rounded-#{index == 0 ? 'l' : 'r'}" %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+          <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="p-6">
+      <!-- Villa Info -->
+      <div class="flex justify-between items-start mb-6">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= @villa.name %></h1>
+          <div class="flex items-center text-gray-600 mb-2">
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <span><%= @villa.address %></span>
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-gray-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+              <span class="text-gray-600"><%= @villa.rooms %> phòng</span>
+            </div>
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-gray-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+              </svg>
+              <span class="text-gray-600"><%= @villa.bathrooms %> phòng tắm</span>
+            </div>
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-gray-600 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+              <span class="text-gray-600">Tối đa <%= @villa.max_guests %> khách</span>
+            </div>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-2xl font-bold text-blue-600 mb-2">
+            <%= number_to_currency(@villa.price, unit: "₫", format: "%n %u") %>/đêm
+          </div>
+          <div class="flex items-center justify-end mb-2">
+            <div class="flex items-center">
+              <% 5.times do |i| %>
+                <svg class="w-5 h-5 <%= i < @villa.average_rating ? 'text-yellow-400' : 'text-gray-300' %>" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+              <% end %>
+            </div>
+            <span class="ml-2 text-gray-600">(<%= @villa.total_reviews %> đánh giá)</span>
+          </div>
+          <% if @villa.available? %>
+            <%= link_to "Đặt ngay", new_booking_path(villa_id: @villa.id), class: "inline-block bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition duration-200" %>
+          <% else %>
+            <button disabled class="inline-block bg-gray-400 text-white py-3 px-6 rounded-md cursor-not-allowed">
+              Đã đặt
+            </button>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="prose max-w-none mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Mô tả</h2>
+        <p class="text-gray-600"><%= @villa.description %></p>
+      </div>
+
+      <!-- Amenities -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Tiện nghi</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <% @villa.amenities.split(',').each do |amenity| %>
+            <div class="flex items-center text-gray-600">
+              <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <%= amenity.strip %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Reviews -->
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Đánh giá</h2>
+        <% if @reviews.any? %>
+          <div class="space-y-6">
+            <% @reviews.each do |review| %>
+              <div class="border-b border-gray-200 pb-6">
+                <div class="flex items-center mb-2">
+                  <div class="flex items-center">
+                    <% 5.times do |i| %>
+                      <svg class="w-5 h-5 <%= i < review.rating ? 'text-yellow-400' : 'text-gray-300' %>" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      </svg>
+                    <% end %>
+                  </div>
+                  <span class="ml-2 text-gray-600"><%= review.user.name %></span>
+                  <span class="ml-2 text-gray-500 text-sm"><%= time_ago_in_words(review.created_at) %> trước</span>
+                </div>
+                <p class="text-gray-600"><%= review.comment %></p>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-gray-600">Chưa có đánh giá nào.</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
