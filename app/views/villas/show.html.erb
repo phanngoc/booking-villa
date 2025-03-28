@@ -1,15 +1,44 @@
 <div class="container mx-auto px-4 py-8">
   <div class="bg-white rounded-lg shadow-md overflow-hidden">
-    <!-- Image Gallery -->
-    <div class="relative h-96">
+    <!-- Image Gallery Slider -->
+    <div class="relative h-[500px]" data-controller="slider">
       <% if @villa.images.present? %>
         <% images = @villa.images.split(',') %>
-        <div class="grid grid-cols-<%= images.length %> gap-2 h-full">
-          <% images.each_with_index do |image, index| %>
-            <div class="<%= index == 0 ? 'col-span-2' : '' %> h-full">
-              <%= image_tag image, class: "w-full h-full object-cover rounded-#{index == 0 ? 'l' : 'r'}" %>
-            </div>
-          <% end %>
+        <div class="relative h-full">
+          <!-- Slider container -->
+          <div class="h-full" data-slider-target="container">
+            <% images.each_with_index do |image, index| %>
+              <div class="absolute inset-0 transition-opacity duration-300 ease-in-out <%= index == 0 ? 'opacity-100' : 'opacity-0' %>" 
+                   data-slider-target="slide">
+                <%= image_tag image, class: "w-full h-full object-cover" %>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Navigation buttons -->
+          <button class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 focus:outline-none"
+                  data-action="click->slider#prev">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <button class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 focus:outline-none"
+                  data-action="click->slider#next">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+
+          <!-- Dots indicator -->
+          <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+            <% images.each_with_index do |_, index| %>
+              <button class="w-2 h-2 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 focus:outline-none transition-all duration-300 <%= index == 0 ? 'w-4 bg-opacity-100' : '' %>"
+                      data-slider-target="dot"
+                      data-action="click->slider#goToSlide"
+                      data-index="<%= index %>">
+              </button>
+            <% end %>
+          </div>
         </div>
       <% else %>
         <div class="w-full h-full bg-gray-200 flex items-center justify-center">

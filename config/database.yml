@@ -24,19 +24,13 @@ test:
   <<: *default
   database: rails_app_test
 
-# As with config/credentials.yml, all sensitive information in this file is
-# encrypted using the Rails master key. Read more at https://guides.rubyonrails.org/security.html#encrypted-credentials-and-active-record-encryption.
+
+# SQLite3 write its data on the local filesystem, as such it requires
+# persistent disks. If you are deploying to a managed service, you should
+# make sure it provides disk persistence, as many don't.
 #
-# A production database configuration is specified here, however, the database
-# is not set to be loaded automatically or loaded at all. For details on how
-# to configure your database in production, see the section starting at
-# https://guides.rubyonrails.org/configuring.html#database-configuration
-#
-# You can use this database configuration with:
-#
-#   production:
-#     url: <%= ENV['RAILS_DATABASE_URL'] %>
-#
+# Similarly, if you deploy your application as a Docker container, you must
+# ensure the database is located in a persisted volume.
 production:
   <<: *default
   database: rails_app_production

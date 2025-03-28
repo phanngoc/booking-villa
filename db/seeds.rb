@@ -56,15 +56,6 @@ amenities_list = [
   "Lò vi sóng"
 ]
 
-# Danh sách hình ảnh mẫu
-sample_images = [
-  "https://images.unsplash.com/photo-1613977257363-707ba9348227?ixlib=rb-4.0.3",
-  "https://images.unsplash.com/photo-1613977257592-4871e5fcd7c4?ixlib=rb-4.0.3",
-  "https://images.unsplash.com/photo-1613977257365-aaae5a9817ff?ixlib=rb-4.0.3",
-  "https://images.unsplash.com/photo-1613977257593-d7c3fc6d04f3?ixlib=rb-4.0.3",
-  "https://images.unsplash.com/photo-1613977257364-2b8d0a0a9e9d?ixlib=rb-4.0.3"
-]
-
 # Danh sách tên villa
 villa_names = [
   "Villa Hương Thảo",
@@ -111,9 +102,6 @@ puts "Đang tạo dữ liệu mẫu..."
   # Tạo trạng thái ngẫu nhiên (70% available, 30% booked)
   random_status = rand(100) < 70 ? 0 : 1
 
-  # Chọn ngẫu nhiên 2-3 hình ảnh từ danh sách mẫu
-  random_images = sample_images.sample(rand(2..3)).join(',')
-
   villa = Villa.create!(
     name: villa_names[i],
     address: locations.sample,
@@ -124,7 +112,7 @@ puts "Đang tạo dữ liệu mẫu..."
     status: random_status,
     amenities: random_amenities.join(','),
     description: "Biệt thự #{villa_names[i]} là một không gian nghỉ dưỡng tuyệt vời với #{random_rooms} phòng ngủ và #{random_bathrooms} phòng tắm. Villa được trang bị đầy đủ tiện nghi hiện đại và có thể chứa tối đa #{random_guests} khách. #{random_amenities.join(', ')}. Đây là lựa chọn hoàn hảo cho kỳ nghỉ của bạn.",
-    images: random_images
+    images: "https://source.unsplash.com/800x600/?villa,#{i}"
   )
 
   # Chỉ tạo booking cho villa có trạng thái available
