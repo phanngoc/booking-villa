@@ -1,0 +1,26 @@
+<div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+  <h2 style="color: #2563EB; margin-bottom: 20px;">Chào mừng <%= @email %>!</h2>
+
+  <p style="color: #374151; line-height: 1.5; margin-bottom: 20px;">
+    Cảm ơn bạn đã đăng ký tài khoản tại Villa Booking. Để hoàn tất quá trình đăng ký, vui lòng xác nhận địa chỉ email của bạn bằng cách nhấp vào liên kết bên dưới:
+  </p>
+
+  <div style="text-align: center; margin: 30px 0;">
+    <%= link_to 'Xác nhận tài khoản của tôi', confirmation_url(@resource, confirmation_token: @token),
+        style: "display: inline-block; padding: 12px 24px; background-color: #2563EB; color: white; text-decoration: none; border-radius: 6px;" %>
+  </div>
+
+  <p style="color: #374151; line-height: 1.5; margin-bottom: 20px;">
+    Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.
+  </p>
+
+  <p style="color: #374151; line-height: 1.5;">
+    Tài khoản của bạn sẽ không được kích hoạt cho đến khi bạn nhấp vào liên kết ở trên để xác nhận địa chỉ email của bạn.
+  </p>
+
+  <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;">
+
+  <p style="color: #6B7280; font-size: 14px; text-align: center;">
+    Villa Booking - Nền tảng đặt phòng villa hàng đầu
+  </p>
+</div> 

@@ -1,18 +1,32 @@
 class BookingsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_villa, only: [:new, :create]
+  before_action :set_villa, except: [ :my_bookings ]
+  before_action :set_booking, only: [ :show ]
+
+  def my_bookings
+    @bookings = current_user.bookings.includes(:villa).order(created_at: :desc)
+  end
+
+  def index
+    @bookings = @villa.bookings
+  end
+
+  def show
+  end
 
   def new
-    @booking = Booking.new(villa: @villa)
+    @booking = @villa.bookings.build
+    puts("new booking", @booking)
+    Rails.logger.debug { @booking.inspect }
   end
 
   def create
-    @booking = current_user.bookings.build(booking_params)
-    @booking.villa = @villa
-    @booking.total_price = @villa.price * (booking_params[:check_out].to_date - booking_params[:check_in].to_date).to_i
+    @booking = @villa.bookings.build(booking_params)
+    puts("create booking_params", booking_params)
+    @booking.user = current_user
 
     if @booking.save
-      redirect_to @villa, notice: 'Đặt phòng thành công.'
+      redirect_to villa_booking_path(@villa, @booking), notice: "Đặt phòng thành công."
     else
       render :new, status: :unprocessable_entity
     end
@@ -24,7 +38,11 @@ class BookingsController < ApplicationController
     @villa = Villa.find(params[:villa_id])
   end
 
+  def set_booking
+    @booking = @villa.bookings.find(params[:id])
+  end
+
   def booking_params
     params.require(:booking).permit(:check_in, :check_out)
   end
-end 
+end

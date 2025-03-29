@@ -6,16 +6,18 @@ Rails.application.routes.draw do
     get "users/show"
   end
   devise_for :users
-  
+
   # Routes cho quản lý user
   resources :users
-  
+
   # Routes cho villa
-  resources :villas, only: [:index, :show]
-  
+  resources :villas, only: [ :index, :show ] do
+    resources :bookings
+  end
+
   # Routes cho booking
   resources :bookings
-  
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -28,4 +30,6 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "villas#index"
+
+  get "my-bookings", to: "bookings#my_bookings", as: :my_bookings
 end

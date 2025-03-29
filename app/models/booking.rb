@@ -46,9 +46,11 @@ class Booking < ApplicationRecord
   def no_overlapping_bookings
     return unless villa && check_in && check_out
     overlapping = villa.bookings.where.not(id: id).where(
-      "(check_in <= ? AND check_out >= ?) OR (check_in <= ? AND check_out >= ?)",
-      check_out, check_in, check_in, check_in
+      "(check_out >= ?) AND (check_in <= ?)",
+      check_in, check_out
     )
+    puts "Overlapping bookings: #{overlapping.inspect}"
+
     if overlapping.exists?
       errors.add(:base, "Villa đã được đặt cho thời gian này")
     end

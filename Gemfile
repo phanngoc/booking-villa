@@ -60,5 +60,6 @@ group :test do
 end
 
 gem "devise", "~> 4.9"
-gem 'sidekiq'
+gem "sidekiq"
 gem "tailwindcss-rails", "~> 4.2"
+gem "dotenv-rails"
