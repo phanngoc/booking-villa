@@ -36,9 +36,7 @@ Rails.application.configure do
 
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = true
-
-  # Disable caching for Action Mailer templates even if Action Controller
-  # caching is enabled.
+  config.action_mailer.perform_deliveries = true
   config.action_mailer.perform_caching = false
 
   # Cấu hình mailer cho development
@@ -50,8 +48,10 @@ Rails.application.configure do
     domain: "gmail.com",
     user_name: ENV["GMAIL_USERNAME"],
     password: ENV["GMAIL_PASSWORD"],
-    authentication: "plain",
-    enable_starttls_auto: true
+    authentication: :login,
+    enable_starttls_auto: true,
+    open_timeout: 5,
+    read_timeout: 5
   }
 
   # Print deprecation notices to the Rails logger.

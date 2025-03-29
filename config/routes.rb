@@ -1,3 +1,5 @@
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
   get "villas/index"
   get "villas/show"
@@ -17,6 +19,11 @@ Rails.application.routes.draw do
 
   # Routes cho booking
   resources :bookings
+
+  # Sidekiq Web UI
+  authenticate :user, lambda { |u| u.admin? } do
+    mount Sidekiq::Web => '/sidekiq'
+  end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
