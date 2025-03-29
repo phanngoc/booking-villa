@@ -2,7 +2,12 @@
 
 Hệ thống đặt phòng villa trực tuyến được xây dựng bằng Ruby on Rails 7 và Tailwind CSS.
 
+Page list
 ![seen1.png](seen1.png)
+
+---
+
+Page detail:
 ![seen2.png](seen2.png)
 
 ## Tính năng chính
