@@ -3,20 +3,13 @@ class FilterField < ApplicationRecord
   validates :field_type, presence: true
   validates :position, presence: true, numericality: { only_integer: true }
   validates :key_query, presence: true, uniqueness: true, format: { with: /\A[a-z0-9_]+\z/, message: "chỉ cho phép chữ thường, số và dấu gạch dưới" }
-  validates :column_name, presence: true, format: { with: /\A[a-z0-9_]+\z/, message: "chỉ cho phép chữ thường, số và dấu gạch dưới" }
+  validates :column_name, presence: false, format: { with: /\A[a-z0-9_]+\z/, message: "chỉ cho phép chữ thường, số và dấu gạch dưới" }
 
-  serialize :options, Array
+  serialize :options, coder: YAML
 
   before_validation :set_default_values
 
-  enum field_type: {
-    text_field: 'text',
-    number_field: 'number',
-    dropdown: 'select',
-    range_field: 'range',
-    checkbox_group: 'checkbox',
-    radio_group: 'radio'
-  }
+  FIELD_TYPES = %w[text_field number_field dropdown range_field checkbox_group radio_group]
 
   scope :active, -> { where(active: true) }
   scope :ordered, -> { order(position: :asc) }

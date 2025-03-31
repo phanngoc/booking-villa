@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_03_29_165030) do
+ActiveRecord::Schema[7.2].define(version: 2025_03_30_060007) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -42,6 +42,10 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_29_165030) do
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "key_query"
+    t.string "column_name", default: "", null: false
+    t.index ["column_name"], name: "index_filter_fields_on_column_name"
+    t.index ["key_query"], name: "index_filter_fields_on_key_query", unique: true
   end
 
   create_table "payments", force: :cascade do |t|
