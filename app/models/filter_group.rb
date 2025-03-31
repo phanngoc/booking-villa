@@ -1,0 +1,2 @@
+class FilterGroup < ApplicationRecord
+end

@@ -1,0 +1,33 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="flex flex-col md:flex-row gap-8">
+    <!-- Sidebar với bộ lọc -->
+    <h2>Bộ lọc</h2>
+    <div class="w-full md:w-1/4">
+      <%= render 'shared/filters' %>
+    </div>
+
+    <!-- Danh sách villa -->
+    <div class="w-full md:w-3/4">
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-4 border-b">
+          <h2 class="text-xl font-semibold">Danh sách Villa</h2>
+        </div>
+
+        <%= turbo_frame_tag "villas_list" do %>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+            <% @villas.each do |villa| %>
+              <%= render 'villas/villa_card', villa: villa %>
+            <% end %>
+          </div>
+
+          <% if @villas.empty? %>
+            <div class="p-8 text-center text-gray-500">
+              <p>Không tìm thấy villa nào phù hợp với tiêu chí tìm kiếm.</p>
+              <%= link_to "Đặt lại bộ lọc", root_path, class: "text-blue-600 hover:text-blue-800" %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div> 

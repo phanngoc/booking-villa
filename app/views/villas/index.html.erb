@@ -5,55 +5,66 @@
     <p class="text-xl text-gray-600">Tìm kiếm biệt thự hoàn hảo cho kỳ nghỉ của bạn</p>
   </div>
 
-  <!-- Search and Filter Section -->
-  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-    <%= form_tag villas_path, method: :get, class: "grid grid-cols-1 md:grid-cols-4 gap-4" do %>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Địa điểm</label>
-        <%= text_field_tag :location, params[:location], class: "w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", placeholder: "Nhập địa điểm" %>
-      </div>
-      
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Giá tối thiểu</label>
-        <%= number_field_tag :min_price, params[:min_price], class: "w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", placeholder: "₫" %>
-      </div>
-      
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Giá tối đa</label>
-        <%= number_field_tag :max_price, params[:max_price], class: "w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", placeholder: "₫" %>
-      </div>
-      
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Số phòng</label>
-        <%= select_tag :rooms, options_for_select((1..10).map { |n| [n, n] }, params[:rooms]), include_blank: "Tất cả", class: "w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
-      </div>
-
-      <div class="md:col-span-4">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Sắp xếp theo</label>
-        <%= select_tag :sort, options_for_select([
-          ["Mới nhất", ""],
-          ["Giá tăng dần", "price_asc"],
-          ["Giá giảm dần", "price_desc"],
-          ["Đánh giá cao nhất", "rating"]
-        ], params[:sort]), class: "w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
-      </div>
-
-      <div class="md:col-span-4">
-        <%= submit_tag "Tìm kiếm", class: "w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200" %>
-      </div>
-    <% end %>
-  </div>
-
-  <!-- Villa Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <% @villas.each do |villa| %>
-      <%= render 'villa_card', villa: villa %>
-    <% end %>
-  </div>
-
-  <% if @villas.empty? %>
-    <div class="text-center py-12">
-      <p class="text-gray-600 text-lg">Không tìm thấy biệt thự nào phù hợp với tiêu chí của bạn.</p>
+  <div class="flex flex-col md:flex-row gap-8">
+    <!-- Sidebar với bộ lọc -->
+    <div class="w-full md:w-1/4">
+      <%= render 'shared/filters' %>
     </div>
-  <% end %>
+
+    <!-- Danh sách villa -->
+    <div class="w-full md:w-3/4">
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-4 border-b flex justify-between items-center">
+          <h2 class="text-xl font-semibold">Danh sách Villa</h2>
+          
+          <!-- Dropdown sắp xếp -->
+          <div class="flex items-center">
+            <span class="text-sm text-gray-600 mr-2">Sắp xếp:</span>
+            <%= form_tag villas_path, method: :get, class: "inline-block", data: { turbo_frame: "villas_list", controller: "auto-submit" } do %>
+              <% # Giữ lại các tham số filter hiện tại %>
+              <% params.except(:sort, :controller, :action).each do |key, value| %>
+                <%= hidden_field_tag key, value %>
+              <% end %>
+              
+              <%= select_tag :sort, 
+                  options_for_select([
+                    ["Mới nhất", ""],
+                    ["Giá tăng dần", "price_asc"],
+                    ["Giá giảm dần", "price_desc"],
+                    ["Đánh giá cao nhất", "rating"]
+                  ], params[:sort]), 
+                  class: "rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+                  data: { action: "change->auto-submit#submit" } %>
+            <% end %>
+          </div>
+        </div>
+
+        <%= turbo_frame_tag "villas_list" do %>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+            <% @villas.each do |villa| %>
+              <%= render 'villa_card', villa: villa %>
+            <% end %>
+          </div>
+
+          <% if @villas.empty? %>
+            <div class="p-8 text-center text-gray-500">
+              <p>Không tìm thấy villa nào phù hợp với tiêu chí tìm kiếm.</p>
+              <%= link_to "Đặt lại bộ lọc", villas_path, class: "text-blue-600 hover:text-blue-800" %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
 </div>
+
+<%# Thêm Stimulus controller cho auto-submit %>
+<%= content_for :head do %>
+  <%= javascript_tag do %>
+    import { Application } from "@hotwired/stimulus"
+    import AutoSubmitController from "./auto_submit_controller"
+
+    const application = Application.start()
+    application.register("auto-submit", AutoSubmitController)
+  <% end %>
+<% end %>

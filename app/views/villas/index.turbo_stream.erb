@@ -1,0 +1,14 @@
+<%= turbo_stream.update "villas_list" do %>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+    <% @villas.each do |villa| %>
+      <%= render 'villa_card', villa: villa %>
+    <% end %>
+  </div>
+
+  <% if @villas.empty? %>
+    <div class="p-8 text-center text-gray-500">
+      <p>Không tìm thấy villa nào phù hợp với tiêu chí tìm kiếm.</p>
+      <%= link_to "Đặt lại bộ lọc", villas_path, class: "text-blue-600 hover:text-blue-800" %>
+    </div>
+  <% end %>
+<% end %> 

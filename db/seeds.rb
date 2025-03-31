@@ -13,15 +13,20 @@ puts "Xóa dữ liệu cũ..."
 Review.delete_all
 Booking.delete_all
 Villa.delete_all
-User.delete_all
+# User.delete_all
 
 # Tạo user đầu tiên
-user = User.create!(
-  email: 'test@example.com',
-  password: 'password',
-  password_confirmation: 'password',
-  name: 'Test User'
-)
+# user = User.create!(
+#   email: 'test@example.com',
+#   password: 'password',
+#   password_confirmation: 'password',
+#   name: 'Test User'
+# )
+
+# Lấy user đầu tiên
+user = User.first
+puts "Sử dụng user: #{user.email}"
+
 
 # Danh sách địa điểm
 locations = [
@@ -147,3 +152,82 @@ puts "Đang tạo dữ liệu mẫu..."
 end
 
 puts "Hoàn thành! Đã tạo #{Villa.count} villa với dữ liệu mẫu."
+
+# Tạo các filter fields
+puts "Creating filter fields..."
+
+# Reset sequence và xóa dữ liệu cũ
+FilterField.delete_all
+ActiveRecord::Base.connection.reset_pk_sequence!('filter_fields')
+
+filter_fields = [
+  {
+    name: "Giá",
+    field_type: "range_field",
+    key_query: "price_range",
+    column_name: "price",
+    position: 1,
+    active: true
+  },
+  {
+    name: "Số phòng ngủ",
+    field_type: "dropdown",
+    key_query: "number_of_rooms",
+    column_name: "bedrooms",
+    options: ["1", "2", "3", "4", "5+"],
+    position: 2,
+    active: true
+  },
+  {
+    name: "Số phòng tắm",
+    field_type: "dropdown",
+    key_query: "number_of_bathrooms",
+    column_name: "bathrooms",
+    options: ["1", "2", "3", "4+"],
+    position: 3,
+    active: true
+  },
+  {
+    name: "Tiện nghi",
+    field_type: "checkbox_group",
+    key_query: "amenities",
+    column_name: "amenities",
+    options: ["Hồ bơi", "BBQ", "Bãi đậu xe", "Ban công", "Bếp", "Máy giặt", "TV", "Wifi"],
+    position: 4,
+    active: true
+  },
+  {
+    name: "Địa điểm",
+    field_type: "text_field",
+    key_query: "location",
+    column_name: "location",
+    position: 5,
+    active: true
+  },
+  {
+    name: "Số khách tối đa",
+    field_type: "dropdown",
+    key_query: "max_guests",
+    column_name: "max_guests",
+    options: ["2", "4", "6", "8", "10+"],
+    position: 6,
+    active: true
+  },
+  {
+    name: "Trạng thái",
+    field_type: "radio_group",
+    key_query: "status",
+    column_name: "status",
+    options: ["Còn trống", "Đã đặt"],
+    position: 7,
+    active: true
+  }
+]
+
+filter_fields.each do |filter_attrs|
+  FilterField.find_or_create_by!(key_query: filter_attrs[:key_query]) do |filter|
+    filter.assign_attributes(filter_attrs)
+  end
+end
+
+puts "Created #{FilterField.count} filter fields"
