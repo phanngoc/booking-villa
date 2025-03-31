@@ -46,4 +46,10 @@ Rails.application.routes.draw do
   root "villas#index"
 
   get "my-bookings", to: "bookings#my_bookings", as: :my_bookings
+
+  if Rails.env.development?
+    mount GraphiQL::Rails::Engine, at: "/graphiql", graphql_path: "/graphql"
+  end
+
+  post "/graphql", to: "graphql#execute"
 end

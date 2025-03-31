@@ -63,3 +63,9 @@ gem "devise", "~> 4.9"
 gem "sidekiq", "~> 7.0"
 gem "tailwindcss-rails", "~> 4.2"
 gem "dotenv-rails"
+
+# GraphQL
+gem 'graphql'
+gem 'graphql-batch'
+gem 'graphql-persisted_queries'
+gem 'graphql-fragment_cache'
