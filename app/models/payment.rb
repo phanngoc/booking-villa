@@ -16,7 +16,8 @@ class Payment < ApplicationRecord
   enum payment_method: {
     credit_card: 0,
     bank_transfer: 1,
-    cash: 2
+    cash: 2,
+    sol_wallet: 3
   }
 
   # Relationships
@@ -29,9 +30,9 @@ class Payment < ApplicationRecord
 
   def update_booking_status
     case status
-    when 'completed'
+    when "completed"
       booking.confirmed!
-    when 'failed'
+    when "failed"
       booking.cancelled!
     end
   end

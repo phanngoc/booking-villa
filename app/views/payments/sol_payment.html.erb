@@ -1,0 +1,132 @@
+<%
+  require 'rqrcode'
+  
+  # Tạo QR code cho địa chỉ ví Solana
+  qr_code_data = "solana:#{@payment_address}?amount=#{@sol_amount}"
+  qrcode = RQRCode::QRCode.new(qr_code_data)
+  
+  # Tạo SVG từ QR code
+  svg = qrcode.as_svg(
+    color: "000",
+    shape_rendering: "crispEdges",
+    module_size: 4,
+    standalone: true,
+    use_path: true
+  )
+%>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-3xl mx-auto">
+    <h1 class="text-2xl font-semibold text-gray-900 mb-6">Thanh toán bằng Solana (SOL)</h1>
+    
+    <div class="bg-white shadow sm:rounded-lg mb-6">
+      <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Chi tiết giao dịch</h3>
+        <div class="flex items-center">
+          <span class="text-sm text-gray-500 mr-2">Thanh toán với</span>
+          <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo" class="h-6 w-6">
+        </div>
+      </div>
+      <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+        <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Villa</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @booking.villa.name %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Thời gian</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= l @booking.check_in, format: :long %> - <%= l @booking.check_out, format: :long %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Số tiền VNĐ</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= number_to_currency(@payment.amount, unit: "₫", format: "%n %u") %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Số lượng SOL</dt>
+            <dd class="mt-1 text-sm text-gray-900 font-semibold"><%= @sol_amount %> SOL</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+      <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Hướng dẫn thanh toán</h3>
+      </div>
+      <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+        <div class="mb-6">
+          <p class="text-sm text-gray-500 mb-4">Để hoàn tất thanh toán, vui lòng chuyển chính xác <span class="font-semibold"><%= @sol_amount %> SOL</span> đến địa chỉ ví dưới đây:</p>
+          
+          <div class="mt-2 flex items-center">
+            <input type="text" id="wallet-address" value="<%= @payment_address %>" readonly class="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-md sm:text-sm border-gray-300" />
+            <button type="button" onclick="copyToClipboard('wallet-address')" class="ml-3 inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              Sao chép
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <div class="flex justify-center mb-6">
+            <div class="p-2 border border-gray-200 rounded-lg">
+              <div id="qrcode" class="w-48 h-48 flex items-center justify-center">
+                <%= svg.html_safe %>
+              </div>
+            </div>
+          </div>
+          <p class="text-sm text-gray-500 text-center">Quét mã QR code bằng ứng dụng ví Solana của bạn</p>
+        </div>
+
+        <div class="rounded-md bg-yellow-50 p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-yellow-800">Lưu ý quan trọng</h3>
+              <div class="mt-2 text-sm text-yellow-700">
+                <ul class="list-disc pl-5 space-y-1">
+                  <li>Đảm bảo bạn chuyển đúng số lượng SOL và đúng địa chỉ ví</li>
+                  <li>Giao dịch Solana thường được hoàn tất trong vài giây</li>
+                  <li>Sau khi chuyển tiền, nhấn nút "Xác nhận thanh toán" bên dưới</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="transaction-form" class="bg-white shadow sm:rounded-lg mb-6">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Xác nhận thanh toán</h3>
+        <%= form_with(url: verify_sol_payment_booking_payment_path(@booking, @payment), method: :post, local: true) do |form| %>
+          <div class="mb-4">
+            <label for="signature" class="block text-sm font-medium text-gray-700 mb-1">ID giao dịch Solana (transaction signature)</label>
+            <%= form.text_field :signature, id: "signature", class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md", required: true, placeholder: "Nhập transaction signature..." %>
+            <p class="mt-1 text-xs text-gray-500">Bạn có thể tìm signature trong ứng dụng ví Solana sau khi hoàn tất giao dịch</p>
+          </div>
+          <%= form.submit "Xác nhận thanh toán", class: "w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        <% end %>
+      </div>
+    </div>
+    
+    <div class="flex justify-between mt-6">
+      <%= link_to "Quay lại", choose_payment_method_booking_payment_path(@booking, @payment), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+      
+      <%= link_to "Hủy đặt phòng", villa_booking_path(@booking.villa, @booking), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+    </div>
+  </div>
+</div>
+
+<script>
+  function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    element.select();
+    document.execCommand('copy');
+    
+    // Hiển thị thông báo đã sao chép (có thể thay bằng toast notification)
+    alert('Đã sao chép địa chỉ ví');
+  }
+</script> 

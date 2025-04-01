@@ -1,0 +1,85 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-3xl mx-auto">
+    <h1 class="text-2xl font-semibold text-gray-900 mb-6">Chọn phương thức thanh toán</h1>
+    
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+      <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Thông tin đặt phòng</h3>
+      </div>
+      <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
+        <dl class="sm:divide-y sm:divide-gray-200">
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Villa</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <%= @booking.villa.name %>
+            </dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Ngày nhận phòng</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <%= l @booking.check_in, format: :long %>
+            </dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Ngày trả phòng</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <%= l @booking.check_out, format: :long %>
+            </dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Tổng tiền</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 font-semibold">
+              <%= number_to_currency(@payment.amount, unit: "₫", format: "%n %u") %>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+
+    <%= form_with(model: @payment, url: booking_payment_path(@booking, @payment), method: :patch) do |form| %>
+      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Phương thức thanh toán</h3>
+        </div>
+        <div class="border-t border-gray-200">
+          <div class="px-4 py-5 space-y-4">
+            <div class="flex items-center">
+              <%= form.radio_button :payment_method, :credit_card, class: "h-4 w-4 text-blue-600 focus:ring-blue-500" %>
+              <label for="payment_payment_method_credit_card" class="ml-3 block text-sm font-medium text-gray-700">
+                Thẻ tín dụng / Thẻ ghi nợ
+              </label>
+            </div>
+            
+            <div class="flex items-center">
+              <%= form.radio_button :payment_method, :bank_transfer, class: "h-4 w-4 text-blue-600 focus:ring-blue-500" %>
+              <label for="payment_payment_method_bank_transfer" class="ml-3 block text-sm font-medium text-gray-700">
+                Chuyển khoản ngân hàng
+              </label>
+            </div>
+            
+            <div class="flex items-center">
+              <%= form.radio_button :payment_method, :cash, class: "h-4 w-4 text-blue-600 focus:ring-blue-500" %>
+              <label for="payment_payment_method_cash" class="ml-3 block text-sm font-medium text-gray-700">
+                Tiền mặt khi nhận phòng
+              </label>
+            </div>
+            
+            <div class="flex items-center">
+              <%= form.radio_button :payment_method, :sol_wallet, class: "h-4 w-4 text-blue-600 focus:ring-blue-500" %>
+              <label for="payment_payment_method_sol_wallet" class="ml-3 flex items-center text-sm font-medium text-gray-700">
+                <span>Thanh toán bằng Solana (SOL)</span>
+                <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo" class="h-5 w-5 ml-2">
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end mt-6">
+        <%= link_to "Quay lại", villa_booking_path(@booking.villa, @booking), class: "mr-3 inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        
+        <%= form.submit "Tiếp tục", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+      </div>
+    <% end %>
+  </div>
+</div> 

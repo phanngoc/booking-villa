@@ -1,0 +1,158 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-3xl mx-auto">
+    <h1 class="text-2xl font-semibold text-gray-900 mb-6">Thông tin thanh toán</h1>
+    
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+      <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Chi tiết đặt phòng</h3>
+      </div>
+      <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
+        <dl class="sm:divide-y sm:divide-gray-200">
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Mã đặt phòng</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              #<%= @booking.id %>
+            </dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Villa</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <%= @booking.villa.name %>
+            </dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Ngày</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <%= l @booking.check_in, format: :long %> - <%= l @booking.check_out, format: :long %>
+            </dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Tổng tiền</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 font-semibold">
+              <%= number_to_currency(@payment.amount, unit: "₫", format: "%n %u") %>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+    
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+      <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Thông tin thanh toán</h3>
+      </div>
+      <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
+        <dl class="sm:divide-y sm:divide-gray-200">
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Phương thức</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <% case @payment.payment_method %>
+              <% when 'credit_card' %>
+                <span class="inline-flex items-center">
+                  <svg class="h-5 w-5 text-gray-400 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                    <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
+                  </svg>
+                  Thẻ tín dụng / Thẻ ghi nợ
+                </span>
+              <% when 'bank_transfer' %>
+                <span class="inline-flex items-center">
+                  <svg class="h-5 w-5 text-gray-400 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                    <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
+                  </svg>
+                  Chuyển khoản ngân hàng
+                </span>
+              <% when 'cash' %>
+                <span class="inline-flex items-center">
+                  <svg class="h-5 w-5 text-gray-400 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                  </svg>
+                  Tiền mặt khi nhận phòng
+                </span>
+              <% when 'sol_wallet' %>
+                <span class="inline-flex items-center">
+                  <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo" class="h-5 w-5 mr-1.5">
+                  Thanh toán Solana (SOL)
+                </span>
+              <% end %>
+            </dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Trạng thái</dt>
+            <dd class="mt-1 sm:mt-0 sm:col-span-2">
+              <% case @payment.status %>
+              <% when 'pending' %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                  Chờ thanh toán
+                </span>
+              <% when 'completed' %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                  Đã thanh toán
+                </span>
+              <% when 'failed' %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                  Thất bại
+                </span>
+              <% when 'refunded' %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                  Đã hoàn tiền
+                </span>
+              <% end %>
+            </dd>
+          </div>
+          
+          <% if @payment.transaction_id.present? %>
+            <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="text-sm font-medium text-gray-500">Mã giao dịch</dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                <% if @payment.payment_method == 'sol_wallet' %>
+                  <a href="https://explorer.solana.com/tx/<%= @payment.transaction_id %>" target="_blank" class="text-blue-600 hover:text-blue-800 break-all">
+                    <%= @payment.transaction_id %>
+                    <svg class="inline-block h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                      <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                    </svg>
+                  </a>
+                <% else %>
+                  <%= @payment.transaction_id %>
+                <% end %>
+              </dd>
+            </div>
+          <% end %>
+          
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Ngày thanh toán</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <% if @payment.completed? %>
+                <%= l @payment.updated_at, format: :long %>
+              <% else %>
+                -
+              <% end %>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+    
+    <% if @payment.pending? %>
+      <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+        <div class="px-4 py-5 sm:px-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Hành động</h3>
+        </div>
+        <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+          <div class="text-center">
+            <% if @payment.payment_method.nil? %>
+              <%= link_to "Chọn phương thức thanh toán", choose_payment_method_booking_payment_path(@booking, @payment), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            <% elsif @payment.payment_method == 'sol_wallet' %>
+              <%= link_to "Tiếp tục thanh toán Solana", sol_payment_booking_payment_path(@booking, @payment), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    
+    <div class="flex justify-between mt-6">
+      <%= link_to "Quay lại đặt phòng", villa_booking_path(@booking.villa, @booking), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+    </div>
+  </div>
+</div> 

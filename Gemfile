@@ -63,3 +63,7 @@ gem "devise", "~> 4.9"
 gem "sidekiq", "~> 7.0"
 gem "tailwindcss-rails", "~> 4.2"
 gem "dotenv-rails"
+
+# Gem cho thanh toán tiền điện tử
+gem "rqrcode", "~> 2.1" # Tạo QR code
+gem "httparty", "~> 0.21.0" # HTTP client đơn giản
