@@ -23,9 +23,10 @@ class VillasController < ApplicationController
       
       when 'checkbox_group'
         if params[field.key_query].present?
-          @villas = @villas.where("#{field.column_name} && ARRAY[?]::varchar[]", params[field.key_query])
+          @villas = @villas.with_amenities(params[field.key_query])
         end
-      
+      puts "params: #{params}"
+      puts "params[field.key_query]: #{field.key_query} #{params[field.key_query]}"
       when 'radio_group'
         @villas = @villas.where(field.column_name => params[field.key_query]) if params[field.key_query].present?
       end

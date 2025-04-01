@@ -21,6 +21,9 @@ class Villa < ApplicationRecord
   scope :available, -> { where(status: :available) }
   scope :price_range, ->(min, max) { where(price: min..max) }
   scope :by_location, ->(location) { where("address ILIKE ?", "%#{location}%") }
+  scope :with_amenities, ->(amenities) {
+    where("amenities @> ?::jsonb", amenities.to_json)
+  }
 
   # Methods
   def average_rating
@@ -29,5 +32,13 @@ class Villa < ApplicationRecord
 
   def total_reviews
     reviews.count
+  end
+
+  def amenities_list
+    amenities || []
+  end
+
+  def amenities_list=(value)
+    self.amenities = value.is_a?(Array) ? value : value.split(',').map(&:strip)
   end
 end
