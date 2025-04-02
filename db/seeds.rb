@@ -91,19 +91,19 @@ puts "Đang tạo dữ liệu mẫu..."
 20.times do |i|
   # Tạo số lượng tiện nghi ngẫu nhiên (từ 5-10)
   random_amenities = amenities_list.sample(rand(5..10))
-  
+
   # Tạo giá ngẫu nhiên (từ 1 triệu đến 5 triệu)
   random_price = rand(1_000_000..5_000_000)
-  
+
   # Tạo số lượng phòng ngẫu nhiên (từ 2-6)
   random_rooms = rand(2..6)
-  
+
   # Tạo số lượng phòng tắm ngẫu nhiên (từ 1-3)
   random_bathrooms = rand(1..3)
-  
+
   # Tạo số lượng khách tối đa ngẫu nhiên (từ 4-12)
   random_guests = rand(4..12)
-  
+
   # Tạo trạng thái ngẫu nhiên (70% available, 30% booked)
   random_status = rand(100) < 70 ? 0 : 1
 
@@ -143,7 +143,7 @@ puts "Đang tạo dữ liệu mẫu..."
         user: user,
         booking: booking,
         rating: rand(3..5),
-        comment: "Tuyệt vời! Villa rất đẹp và tiện nghi. #{['Chúng tôi sẽ quay lại!', 'Dịch vụ rất tốt!', 'Cảnh quan tuyệt vời!', 'Nhân viên phục vụ nhiệt tình!'].sample}"
+        comment: "Tuyệt vời! Villa rất đẹp và tiện nghi. #{[ 'Chúng tôi sẽ quay lại!', 'Dịch vụ rất tốt!', 'Cảnh quan tuyệt vời!', 'Nhân viên phục vụ nhiệt tình!' ].sample}"
       )
     end
   end
@@ -174,7 +174,7 @@ filter_fields = [
     field_type: "dropdown",
     key_query: "number_of_rooms",
     column_name: "bedrooms",
-    options: ["1", "2", "3", "4", "5+"],
+    options: [ "1", "2", "3", "4", "5+" ],
     position: 2,
     active: true
   },
@@ -183,7 +183,7 @@ filter_fields = [
     field_type: "dropdown",
     key_query: "number_of_bathrooms",
     column_name: "bathrooms",
-    options: ["1", "2", "3", "4+"],
+    options: [ "1", "2", "3", "4+" ],
     position: 3,
     active: true
   },
@@ -192,7 +192,7 @@ filter_fields = [
     field_type: "checkbox_group",
     key_query: "amenities",
     column_name: "amenities",
-    options: ["Hồ bơi", "BBQ", "Bãi đậu xe", "Ban công", "Bếp", "Máy giặt", "TV", "Wifi"],
+    options: amenities_list,
     position: 4,
     active: true
   },
@@ -209,7 +209,7 @@ filter_fields = [
     field_type: "dropdown",
     key_query: "max_guests",
     column_name: "max_guests",
-    options: ["2", "4", "6", "8", "10+"],
+    options: [ "2", "4", "6", "8", "10+" ],
     position: 6,
     active: true
   },
@@ -218,7 +218,7 @@ filter_fields = [
     field_type: "radio_group",
     key_query: "status",
     column_name: "status",
-    options: ["Còn trống", "Đã đặt"],
+    options: [ "Còn trống", "Đã đặt" ],
     position: 7,
     active: true
   }

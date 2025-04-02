@@ -22,7 +22,8 @@ class Villa < ApplicationRecord
   scope :price_range, ->(min, max) { where(price: min..max) }
   scope :by_location, ->(location) { where("address ILIKE ?", "%#{location}%") }
   scope :with_amenities, ->(amenities) {
-    where("amenities @> ?::jsonb", amenities.to_json)
+    array = amenities.is_a?(Array) ? amenities : [ amenities ]
+    where("amenities ?& array[:amenities]", amenities: array)
   }
 
   # Methods
@@ -39,6 +40,6 @@ class Villa < ApplicationRecord
   end
 
   def amenities_list=(value)
-    self.amenities = value.is_a?(Array) ? value : value.split(',').map(&:strip)
+    self.amenities = value.is_a?(Array) ? value : value.split(",").map(&:strip)
   end
 end
