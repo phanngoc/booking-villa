@@ -1,52 +1,75 @@
 class VillasController < ApplicationController
   def index
     @villas = Villa.all
-    
-    FilterField.active.ordered.each do |field|
-      case field.field_type
-      when 'text_field'
-        @villas = @villas.where("#{field.column_name} ILIKE ?", "%#{params[field.key_query]}%") if params[field.key_query].present?
-      
-      when 'number_field'
-        @villas = @villas.where(field.column_name => params[field.key_query]) if params[field.key_query].present?
-      
-      when 'dropdown'
-        @villas = @villas.where(field.column_name => params[field.key_query]) if params[field.key_query].present?
-      
-      when 'range_field'
-        if params["#{field.key_query}_min"].present?
-          @villas = @villas.where("#{field.column_name} >= ?", params["#{field.key_query}_min"])
-        end
-        if params["#{field.key_query}_max"].present?
-          @villas = @villas.where("#{field.column_name} <= ?", params["#{field.key_query}_max"])
-        end
-      
-      when 'checkbox_group'
-        if params[field.key_query].present?
-          @villas = @villas.with_amenities(params[field.key_query])
-        end
-      puts "params: #{params}"
-      puts "params[field.key_query]: #{field.key_query} #{params[field.key_query]}"
-      when 'radio_group'
-        @villas = @villas.where(field.column_name => params[field.key_query]) if params[field.key_query].present?
+
+    # Lọc theo địa điểm
+    if params[:location].present?
+      @villas = @villas.by_location(params[:location])
+    end
+
+    # Lọc theo khoảng giá
+    if params[:price_range_min].present? && params[:price_range_max].present?
+      @villas = @villas.price_range(params[:price_range_min].to_f, params[:price_range_max].to_f)
+    end
+
+    # Lọc theo số phòng ngủ
+    if params[:rooms].present?
+      @villas = @villas.where(rooms: params[:rooms])
+    end
+
+    # Lọc theo số phòng tắm
+    if params[:bathrooms].present?
+      @villas = @villas.where(bathrooms: params[:bathrooms])
+    end
+
+    # Lọc theo số khách tối đa
+    if params[:max_guests].present?
+      @villas = @villas.where(max_guests: params[:max_guests])
+    end
+
+    # Lọc theo trạng thái
+    if params[:status].present?
+      @villas = @villas.where(status: params[:status])
+    end
+
+    # Lọc theo tiện ích (lọc có/không)
+    if params[:amenities].present?
+      amenity_ids = Amenity.where(name: params[:amenities]).pluck(:id)
+      @villas = @villas.with_amenities(amenity_ids) if amenity_ids.present?
+    end
+
+    # Lọc theo giá trị tiện ích cụ thể
+    Amenity.where(require_value: true).each do |amenity|
+      param_key = "amenity_#{amenity.id}"
+      if params[param_key].present?
+        @villas = @villas.with_amenity_value(amenity.id, params[param_key])
       end
     end
-    
+
     # Áp dụng sắp xếp
     @villas = case params[:sort]
-              when 'price_asc'
-                @villas.order(price: :asc)
-              when 'price_desc'
-                @villas.order(price: :desc)
-              when 'rating'
-                @villas.left_joins(:reviews)
-                       .group('villas.id')
-                       .order('AVG(reviews.rating) DESC NULLS LAST')
-              else
-                @villas.order(created_at: :desc)
-              end
+    when "price_asc"
+      @villas.order(price: :asc)
+    when "price_desc"
+      @villas.order(price: :desc)
+    when "rating"
+      @villas.left_joins(:reviews)
+             .group("villas.id")
+             .order("AVG(reviews.rating) DESC NULLS LAST")
+    else
+      @villas.order(created_at: :desc)
+    end
 
     @villas = @villas.includes(:reviews)
+
+    # Lấy danh sách tiện ích để hiển thị trong form filter
+    @amenities = Amenity.all
+
+    # Lấy các giá trị cho filter tiện ích có giá trị
+    @amenity_values = {}
+    Amenity.where(require_value: true).each do |amenity|
+      @amenity_values[amenity.id] = VillaAmenity.where(amenity: amenity).select(:value).distinct.pluck(:value)
+    end
 
     respond_to do |format|
       format.html
