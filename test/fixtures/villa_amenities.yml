@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  villa: one
+  amenity: one
+  value: MyString
+
+two:
+  villa: two
+  amenity: two
+  value: MyString

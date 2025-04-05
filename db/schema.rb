@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_04_01_155355) do
+ActiveRecord::Schema[7.2].define(version: 2025_04_02_160130) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -19,6 +19,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_01_155355) do
     t.string "icon"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "require_value", default: false
   end
 
   create_table "bookings", force: :cascade do |t|
@@ -32,20 +33,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_01_155355) do
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_bookings_on_user_id"
     t.index ["villa_id"], name: "index_bookings_on_villa_id"
-  end
-
-  create_table "filter_fields", force: :cascade do |t|
-    t.string "name"
-    t.string "field_type"
-    t.text "options"
-    t.boolean "active"
-    t.integer "position"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "key_query"
-    t.string "column_name", default: "", null: false
-    t.index ["column_name"], name: "index_filter_fields_on_column_name"
-    t.index ["key_query"], name: "index_filter_fields_on_key_query", unique: true
   end
 
   create_table "payments", force: :cascade do |t|
@@ -95,9 +82,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_01_155355) do
   create_table "villa_amenities", force: :cascade do |t|
     t.bigint "villa_id", null: false
     t.bigint "amenity_id", null: false
+    t.string "value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["amenity_id"], name: "index_villa_amenities_on_amenity_id"
+    t.index ["value"], name: "index_villa_amenities_on_value"
+    t.index ["villa_id", "amenity_id"], name: "index_villa_amenities_on_villa_id_and_amenity_id", unique: true
     t.index ["villa_id"], name: "index_villa_amenities_on_villa_id"
   end
 

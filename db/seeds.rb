@@ -12,6 +12,8 @@
 puts "Xóa dữ liệu cũ..."
 Review.delete_all
 Booking.delete_all
+VillaAmenity.delete_all
+Amenity.delete_all
 Villa.delete_all
 # User.delete_all
 
@@ -44,22 +46,35 @@ locations = [
 
 # Danh sách tiện nghi
 amenities_list = [
-  "Bể bơi vô cực",
-  "Bếp đầy đủ tiện nghi",
-  "Điều hòa nhiệt độ",
-  "WiFi miễn phí",
-  "TV màn hình phẳng",
-  "Máy giặt",
-  "Bãi đỗ xe",
-  "Sân vườn",
-  "Ban công",
-  "Lò sưởi",
-  "Bàn ăn ngoài trời",
-  "Bếp nướng BBQ",
-  "Bàn làm việc",
-  "Tủ lạnh",
-  "Lò vi sóng"
+  { name: "Bể bơi vô cực", require_value: false },
+  { name: "Bếp đầy đủ tiện nghi", require_value: false },
+  { name: "Điều hòa nhiệt độ", require_value: true },
+  { name: "WiFi miễn phí", require_value: true },
+  { name: "TV màn hình phẳng", require_value: true },
+  { name: "Máy giặt", require_value: false },
+  { name: "Bãi đỗ xe", require_value: true },
+  { name: "Sân vườn", require_value: true },
+  { name: "Ban công", require_value: true },
+  { name: "Lò sưởi", require_value: false },
+  { name: "Bàn ăn ngoài trời", require_value: false },
+  { name: "Bếp nướng BBQ", require_value: false },
+  { name: "Bàn làm việc", require_value: false },
+  { name: "Tủ lạnh", require_value: false },
+  { name: "Lò vi sóng", require_value: false }
 ]
+
+# Tạo amenities
+puts "Đang tạo dữ liệu tiện ích..."
+amenity_records = amenities_list.map do |amenity_attr|
+  Amenity.create!(
+    name: amenity_attr[:name],
+    require_value: amenity_attr[:require_value]
+  )
+end
+
+# Lưu tên tiện ích (để dùng sau)
+amenity_names = amenity_records.map(&:name)
+puts "Đã tạo #{amenity_records.count} tiện ích"
 
 # Danh sách tên villa
 villa_names = [
@@ -90,22 +105,26 @@ puts "Đang tạo dữ liệu mẫu..."
 # Tạo 20 villa
 20.times do |i|
   # Tạo số lượng tiện nghi ngẫu nhiên (từ 5-10)
-  random_amenities = amenities_list.sample(rand(5..10))
-  
+  random_amenities_count = rand(5..10)
+  random_amenities = amenity_records.sample(random_amenities_count)
+
   # Tạo giá ngẫu nhiên (từ 1 triệu đến 5 triệu)
   random_price = rand(1_000_000..5_000_000)
-  
+
   # Tạo số lượng phòng ngẫu nhiên (từ 2-6)
   random_rooms = rand(2..6)
-  
+
   # Tạo số lượng phòng tắm ngẫu nhiên (từ 1-3)
   random_bathrooms = rand(1..3)
-  
+
   # Tạo số lượng khách tối đa ngẫu nhiên (từ 4-12)
   random_guests = rand(4..12)
-  
+
   # Tạo trạng thái ngẫu nhiên (70% available, 30% booked)
   random_status = rand(100) < 70 ? 0 : 1
+
+  # Lưu trữ tên tiện ích để sử dụng trong mô tả
+  amenity_names_for_villa = random_amenities.map(&:name)
 
   villa = Villa.create!(
     name: villa_names[i],
@@ -115,10 +134,41 @@ puts "Đang tạo dữ liệu mẫu..."
     bathrooms: random_bathrooms,
     max_guests: random_guests,
     status: random_status,
-    amenities: random_amenities.join(','),
-    description: "Biệt thự #{villa_names[i]} là một không gian nghỉ dưỡng tuyệt vời với #{random_rooms} phòng ngủ và #{random_bathrooms} phòng tắm. Villa được trang bị đầy đủ tiện nghi hiện đại và có thể chứa tối đa #{random_guests} khách. #{random_amenities.join(', ')}. Đây là lựa chọn hoàn hảo cho kỳ nghỉ của bạn.",
+    description: "Biệt thự #{villa_names[i]} là một không gian nghỉ dưỡng tuyệt vời với #{random_rooms} phòng ngủ và #{random_bathrooms} phòng tắm. Villa được trang bị đầy đủ tiện nghi hiện đại và có thể chứa tối đa #{random_guests} khách. #{amenity_names_for_villa.join(', ')}. Đây là lựa chọn hoàn hảo cho kỳ nghỉ của bạn.",
     images: "https://source.unsplash.com/800x600/?villa,#{i}"
   )
+
+  # Tạo VillaAmenity cho mỗi tiện ích được chọn
+  random_amenities.each do |amenity|
+    # Tạo giá trị phù hợp cho tiện ích
+    if amenity.require_value
+      case amenity.name
+      when "Điều hòa nhiệt độ"
+        value = [ "18°C", "20°C", "22°C", "24°C", "26°C" ].sample
+      when "WiFi miễn phí"
+        value = [ "50 Mbps", "100 Mbps", "200 Mbps", "500 Mbps" ].sample
+      when "TV màn hình phẳng"
+        value = [ "32 inch", "42 inch", "50 inch", "55 inch", "65 inch" ].sample
+      when "Bãi đỗ xe"
+        value = [ "#{rand(1..5)} chỗ đậu xe" ].sample
+      when "Sân vườn"
+        value = [ "#{rand(50..200)}m²" ].sample
+      when "Ban công"
+        value = [ "Hướng biển", "Hướng núi", "Hướng thành phố", "Hướng vườn" ].sample
+      else
+        value = "Có"
+      end
+    else
+      value = "Có"
+    end
+
+    # Tạo record VillaAmenity
+    VillaAmenity.create!(
+      villa: villa,
+      amenity: amenity,
+      value: value
+    )
+  end
 
   # Chỉ tạo booking cho villa có trạng thái available
   if villa.available?
@@ -143,91 +193,12 @@ puts "Đang tạo dữ liệu mẫu..."
         user: user,
         booking: booking,
         rating: rand(3..5),
-        comment: "Tuyệt vời! Villa rất đẹp và tiện nghi. #{['Chúng tôi sẽ quay lại!', 'Dịch vụ rất tốt!', 'Cảnh quan tuyệt vời!', 'Nhân viên phục vụ nhiệt tình!'].sample}"
+        comment: "Tuyệt vời! Villa rất đẹp và tiện nghi. #{[ 'Chúng tôi sẽ quay lại!', 'Dịch vụ rất tốt!', 'Cảnh quan tuyệt vời!', 'Nhân viên phục vụ nhiệt tình!' ].sample}"
       )
     end
   end
 
-  puts "Đã tạo villa: #{villa.name}"
+  puts "Đã tạo villa: #{villa.name} với #{random_amenities.count} tiện ích"
 end
 
-puts "Hoàn thành! Đã tạo #{Villa.count} villa với dữ liệu mẫu."
-
-# Tạo các filter fields
-puts "Creating filter fields..."
-
-# Reset sequence và xóa dữ liệu cũ
-FilterField.delete_all
-ActiveRecord::Base.connection.reset_pk_sequence!('filter_fields')
-
-filter_fields = [
-  {
-    name: "Giá",
-    field_type: "range_field",
-    key_query: "price_range",
-    column_name: "price",
-    position: 1,
-    active: true
-  },
-  {
-    name: "Số phòng ngủ",
-    field_type: "dropdown",
-    key_query: "number_of_rooms",
-    column_name: "bedrooms",
-    options: ["1", "2", "3", "4", "5+"],
-    position: 2,
-    active: true
-  },
-  {
-    name: "Số phòng tắm",
-    field_type: "dropdown",
-    key_query: "number_of_bathrooms",
-    column_name: "bathrooms",
-    options: ["1", "2", "3", "4+"],
-    position: 3,
-    active: true
-  },
-  {
-    name: "Tiện nghi",
-    field_type: "checkbox_group",
-    key_query: "amenities",
-    column_name: "amenities",
-    options: ["Hồ bơi", "BBQ", "Bãi đậu xe", "Ban công", "Bếp", "Máy giặt", "TV", "Wifi"],
-    position: 4,
-    active: true
-  },
-  {
-    name: "Địa điểm",
-    field_type: "text_field",
-    key_query: "location",
-    column_name: "location",
-    position: 5,
-    active: true
-  },
-  {
-    name: "Số khách tối đa",
-    field_type: "dropdown",
-    key_query: "max_guests",
-    column_name: "max_guests",
-    options: ["2", "4", "6", "8", "10+"],
-    position: 6,
-    active: true
-  },
-  {
-    name: "Trạng thái",
-    field_type: "radio_group",
-    key_query: "status",
-    column_name: "status",
-    options: ["Còn trống", "Đã đặt"],
-    position: 7,
-    active: true
-  }
-]
-
-filter_fields.each do |filter_attrs|
-  FilterField.find_or_create_by!(key_query: filter_attrs[:key_query]) do |filter|
-    filter.assign_attributes(filter_attrs)
-  end
-end
-
-puts "Created #{FilterField.count} filter fields"
+puts "Hoàn thành! Đã tạo #{Villa.count} villa với dữ liệu mẫu và #{VillaAmenity.count} tiện ích villa."
