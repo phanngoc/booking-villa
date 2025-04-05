@@ -12,7 +12,7 @@
   
   <div class="p-4">
     <h3 class="text-lg font-semibold text-gray-900 mb-2">
-      <%= link_to villa.name, villa_path(villa), class: "hover:text-blue-600" %>
+      <%= link_to villa.name, villa_path(villa), class: "hover:text-blue-600", data: { turbo: false } %>
     </h3>
     
     <div class="flex items-center text-gray-600 mb-2">
@@ -55,6 +55,6 @@
       </div>
     </div>
 
-    <%= link_to "Chi tiết", villa_path(villa), class: "mt-4 block w-full text-center bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200" %>
+    <%= link_to "Chi tiết", villa_path(villa), class: "mt-4 block w-full text-center bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200", data: { turbo: false } %>
   </div>
 </div> 

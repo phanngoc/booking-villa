@@ -82,14 +82,111 @@
               Trạng thái
             </dt>
             <dd class="mt-1 sm:mt-0 sm:col-span-2">
-              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                Chờ xác nhận
-              </span>
+              <% case @booking.status %>
+              <% when 'pending' %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                  Chờ thanh toán
+                </span>
+              <% when 'confirmed' %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                  Đã xác nhận
+                </span>
+              <% when 'completed' %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                  Hoàn thành
+                </span>
+              <% when 'cancelled' %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                  Đã hủy
+                </span>
+              <% end %>
             </dd>
           </div>
+          
+          <% if @booking.payment.present? %>
+            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="text-sm font-medium text-gray-500">
+                Thanh toán
+              </dt>
+              <dd class="mt-1 sm:mt-0 sm:col-span-2">
+                <% case @booking.payment.status %>
+                <% when 'pending' %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                    Chờ thanh toán
+                  </span>
+                <% when 'completed' %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Đã thanh toán
+                  </span>
+                <% when 'failed' %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                    Thất bại
+                  </span>
+                <% when 'refunded' %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                    Đã hoàn tiền
+                  </span>
+                <% end %>
+                
+                <% if @booking.payment.payment_method == 'sol_wallet' && @booking.payment.completed? %>
+                  <div class="mt-2 text-sm text-gray-500">
+                    Thanh toán bằng Solana (SOL)
+                    <a href="https://explorer.solana.com/tx/<%= @booking.payment.transaction_id %>" target="_blank" class="text-blue-600 hover:text-blue-800 ml-1">
+                      Xem giao dịch
+                      <svg class="inline-block h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                        <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                      </svg>
+                    </a>
+                  </div>
+                <% end %>
+              </dd>
+            </div>
+          <% end %>
         </dl>
       </div>
     </div>
+
+    <% if @booking.payment&.pending? %>
+      <div class="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Thanh toán</h3>
+          <p class="mb-4 text-sm text-gray-500">Vui lòng hoàn tất thanh toán để xác nhận đặt phòng của bạn.</p>
+          
+          <div class="mt-2">
+            <%= link_to booking_payment_path(@booking), class: "w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+              <span>Thanh toán ngay</span>
+            <% end %>
+          </div>
+          
+          <div class="mt-4 grid grid-cols-3 gap-3">
+            <div class="col-span-3 sm:col-span-1">
+              <%= link_to choose_payment_method_booking_payment_path(@booking), class: "flex justify-center items-center space-x-2 px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo" class="h-5 w-5">
+                <span>Solana (SOL)</span>
+              <% end %>
+            </div>
+            <div class="col-span-3 sm:col-span-1">
+              <%= link_to "#", class: "flex justify-center items-center space-x-2 px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                  <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
+                </svg>
+                <span>Thẻ tín dụng</span>
+              <% end %>
+            </div>
+            <div class="col-span-3 sm:col-span-1">
+              <%= link_to "#", class: "flex justify-center items-center space-x-2 px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                </svg>
+                <span>Ngân hàng</span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
 
     <div class="mt-6 flex justify-between">
       <%= link_to "Quay lại trang chủ", root_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>

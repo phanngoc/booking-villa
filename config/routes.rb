@@ -25,7 +25,13 @@ Rails.application.routes.draw do
   end
 
   # Routes cho booking
-  resources :bookings
+  resources :bookings do
+    resource :payment, only: [ :show, :update ] do
+      get :choose_payment_method
+      get :sol_payment
+      post :verify_sol_payment
+    end
+  end
 
   # Sidekiq Web UI
   authenticate :user, lambda { |u| u.admin? } do
