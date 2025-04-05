@@ -1,11 +1,18 @@
-require 'sidekiq/web'
+require "sidekiq/web"
 
 Rails.application.routes.draw do
   get "villas/index"
   get "villas/show"
   namespace :admin do
+    get "filter_fields/index"
+    get "filter_fields/new"
+    get "filter_fields/create"
+    get "filter_fields/edit"
+    get "filter_fields/update"
+    get "filter_fields/destroy"
     get "users/index"
     get "users/show"
+    resources :filter_fields
   end
   devise_for :users
 
@@ -22,7 +29,7 @@ Rails.application.routes.draw do
 
   # Sidekiq Web UI
   authenticate :user, lambda { |u| u.admin? } do
-    mount Sidekiq::Web => '/sidekiq'
+    mount Sidekiq::Web => "/sidekiq"
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
