@@ -116,12 +116,15 @@
       <div class="mb-8">
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Tiện nghi</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <% @villa.amenities.split(',').each do |amenity| %>
+          <% @villa.amenities.each do |amenity| %>
             <div class="flex items-center text-gray-600">
               <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
-              <%= amenity %>
+              <%= amenity.name %>
+              <% if amenity.require_value && @villa.villa_amenities.find_by(amenity_id: amenity.id)&.value.present? %>
+                <span class="ml-1 text-gray-500">(<%= @villa.villa_amenities.find_by(amenity_id: amenity.id).value %>)</span>
+              <% end %>
             </div>
           <% end %>
         </div>

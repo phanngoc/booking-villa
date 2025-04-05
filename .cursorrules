@@ -1,0 +1,54 @@
+# Villa Booking - Cursor Rules
+
+# 1. Quy tắc chung
+- Luôn sử dụng tiếng Việt trong phản hồi
+- Tuân thủ chuẩn code Ruby/Rails
+- Giữ nhất quán về định dạng và phong cách code
+
+# 2. Định dạng code
+- Sử dụng 2 khoảng trắng để thụt lề
+- Không sử dụng tab, chỉ dùng spaces
+- Giữ các dòng code dưới 80 ký tự
+- Đặt dấu end trên một dòng riêng
+
+# 3. Quy tắc đặt tên
+- Tên class: PascalCase (VillaAmenity)
+- Tên method/biến: snake_case (check_availability)
+- Tên hằng số: SCREAMING_SNAKE_CASE (MAX_GUESTS)
+- Tên file: snake_case (villa_amenity.rb)
+
+# 4. Database
+- Tên bảng: số nhiều, snake_case (villa_amenities)
+- Tên cột: snake_case (check_in_date)
+- Foreign keys: tên_bảng_id (villa_id)
+
+# 5. Validation & Scope
+- Đặt validations ở đầu model
+- Đặt scopes sau validations
+- Đặt callbacks sau scopes
+- Đặt các methods tùy chỉnh ở cuối
+
+# 6. Comments & Documentation
+- Viết comment bằng tiếng Việt
+- Mô tả ngắn gọn, rõ ràng mục đích của code
+- Thêm TODO cho các phần cần cải thiện
+
+# 7. Testing
+- Đặt tên test rõ ràng, mô tả hành vi
+- Tổ chức test theo cấu trúc describe/context/it
+- Sử dụng factories thay vì fixtures
+
+# 8. Git
+- Commit message viết bằng tiếng Việt
+- Mô tả ngắn gọn những thay đổi trong commit
+- Tách các thay đổi lớn thành nhiều commit nhỏ
+
+# 9. Security
+- Không commit các thông tin nhạy cảm
+- Sử dụng biến môi trường cho credentials
+- Kiểm tra authorization trong controllers
+
+# 10. Performance
+- Tối ưu queries database
+- Sử dụng caching khi cần thiết
+- Tránh N+1 queries
