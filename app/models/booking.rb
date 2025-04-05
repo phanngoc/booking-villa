@@ -42,7 +42,7 @@ class Booking < ApplicationRecord
   def villa_available
     return unless villa && check_in && check_out
     unless villa.available?
-      errors.add(:base, "Villa không khả dụng cho thời gian này")
+      errors.add(:base, "Villa không khả dụng cho việc đặt phòng")
     end
   end
 

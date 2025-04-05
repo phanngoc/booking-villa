@@ -1,6 +1,7 @@
 class VillasController < ApplicationController
   def index
-    @villas = Villa.all
+    # Chỉ lấy các villa có trạng thái available
+    @villas = Villa.where(status: :available)
 
     # Lọc theo địa điểm
     if params[:location].present?
@@ -25,11 +26,6 @@ class VillasController < ApplicationController
     # Lọc theo số khách tối đa
     if params[:max_guests].present?
       @villas = @villas.where(max_guests: params[:max_guests])
-    end
-
-    # Lọc theo trạng thái
-    if params[:status].present?
-      @villas = @villas.where(status: params[:status])
     end
 
     # Lọc theo tiện ích (lọc có/không)
@@ -79,6 +75,13 @@ class VillasController < ApplicationController
 
   def show
     @villa = Villa.find(params[:id])
+
+    # Chuyển hướng về trang chủ nếu villa bị disabled
+    if @villa.disabled?
+      redirect_to root_path, alert: "Villa này hiện không khả dụng."
+      return
+    end
+
     @reviews = @villa.reviews.includes(:user).recent
   end
 end

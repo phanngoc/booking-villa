@@ -30,6 +30,7 @@ Rails.application.routes.draw do
       get :choose_payment_method
       get :sol_payment
       post :verify_sol_payment
+      get :bank_transfer
     end
   end
 

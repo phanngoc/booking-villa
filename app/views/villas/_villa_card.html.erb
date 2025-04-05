@@ -2,11 +2,6 @@
   <% if villa.images.present? %>
     <div class="relative h-48">
       <%= image_tag villa.images.split(',').first, class: "w-full h-full object-cover" %>
-      <% if villa.status == 'booked' %>
-        <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-sm">
-          Đã đặt
-        </div>
-      <% end %>
     </div>
   <% end %>
   

@@ -96,13 +96,7 @@
             </div>
             <span class="ml-2 text-gray-600">(<%= @villa.total_reviews %> đánh giá)</span>
           </div>
-          <% if @villa.available? %>
-            <%= link_to "Đặt ngay", new_booking_path(villa_id: @villa.id), class: "inline-block bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition duration-200" %>
-          <% else %>
-            <button disabled class="inline-block bg-gray-400 text-white py-3 px-6 rounded-md cursor-not-allowed">
-              Đã đặt
-            </button>
-          <% end %>
+          <%= link_to "Đặt ngay", new_booking_path(villa_id: @villa.id), class: "inline-block bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition duration-200" %>
         </div>
       </div>
 
