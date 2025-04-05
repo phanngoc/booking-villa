@@ -24,13 +24,6 @@ Rails.application.routes.draw do
     resources :bookings
   end
 
-  # Routes cho tìm kiếm villa
-  resources :villa_searches, only: [ :index ] do
-    collection do
-      get :advanced_search
-    end
-  end
-
   # Routes cho booking
   resources :bookings
 
