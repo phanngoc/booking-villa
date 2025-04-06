@@ -52,43 +52,6 @@
           </div>
         </div>
 
-        <!-- Phương thức thanh toán -->
-        <div class="border border-gray-200 rounded-md p-4">
-          <h3 class="text-lg font-medium text-gray-900 mb-3">Phương thức thanh toán</h3>
-          
-          <%= f.fields_for :payment_attributes do |payment_form| %>
-            <div class="space-y-4">
-              <div class="flex items-center">
-                <%= payment_form.radio_button :payment_method, "sol_wallet", class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" %>
-                <label for="booking_payment_attributes_payment_method_sol_wallet" class="ml-3 block">
-                  <span class="text-sm font-medium text-gray-700">Thanh toán ngay bằng SOL Wallet</span>
-                  <span class="block text-xs text-gray-500">Thanh toán ngay bằng Solana blockchain</span>
-                </label>
-              </div>
-              
-              <div class="flex items-center">
-                <%= payment_form.radio_button :payment_method, "cash", class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300", checked: true %>
-                <label for="booking_payment_attributes_payment_method_cash" class="ml-3 block">
-                  <span class="text-sm font-medium text-gray-700">Thanh toán khi nhận phòng</span>
-                  <span class="block text-xs text-gray-500">Thanh toán trực tiếp tại villa</span>
-                </label>
-              </div>
-              
-              <%= payment_form.hidden_field :status, value: "pending" %>
-              <%= payment_form.hidden_field :amount, value: @villa.price * 2 %>
-            </div>
-
-            <!-- Hiển thị các thông tin SOL wallet nếu chọn phương thức này -->
-            <div id="sol_wallet_info" class="mt-4 p-3 bg-blue-50 rounded-md hidden">
-              <div class="flex items-center">
-                <img src="https://solana.com/src/img/branding/solanaLogoMark.svg" class="h-5 w-5 mr-2" alt="Solana Logo">
-                <span class="text-sm font-medium text-gray-700">Cổng thanh toán Solana</span>
-              </div>
-              <p class="text-xs text-gray-500 mt-1">Sau khi xác nhận đặt phòng, bạn sẽ được chuyển đến trang thanh toán SOL</p>
-            </div>
-          <% end %>
-        </div>
-
         <div class="flex justify-end space-x-3">
           <%= link_to "Hủy", villa_path(@villa), class: "inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
           <%= f.submit "Đặt phòng", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
@@ -96,26 +59,4 @@
       <% end %>
     </div>
   </div>
-</div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const solWalletRadio = document.getElementById('booking_payment_attributes_payment_method_sol_wallet');
-    const cashRadio = document.getElementById('booking_payment_attributes_payment_method_cash');
-    const solWalletInfo = document.getElementById('sol_wallet_info');
-    
-    function toggleSolWalletInfo() {
-      if (solWalletRadio.checked) {
-        solWalletInfo.classList.remove('hidden');
-      } else {
-        solWalletInfo.classList.add('hidden');
-      }
-    }
-    
-    solWalletRadio.addEventListener('change', toggleSolWalletInfo);
-    cashRadio.addEventListener('change', toggleSolWalletInfo);
-    
-    // Kiểm tra trạng thái ban đầu
-    toggleSolWalletInfo();
-  });
-</script> 
+</div> 

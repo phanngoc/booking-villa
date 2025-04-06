@@ -23,19 +23,17 @@ class BookingsController < ApplicationController
     @booking = @villa.bookings.build(booking_params)
     @booking.user = current_user
 
-    # Đảm bảo payment có đầy đủ thông tin
-    if @booking.payment
-      @booking.payment.amount = calculate_total_price(@booking)
-      @booking.payment.status = :pending
-    end
+    # Tạo payment với trạng thái mặc định
+    @booking.build_payment(
+      status: :pending,
+      amount: calculate_total_price(@booking),
+      payment_method: :cash # Giá trị mặc định, sẽ được thay đổi ở bước tiếp theo
+    )
 
     if @booking.save
-      # Chuyển hướng dựa vào phương thức thanh toán
-      if @booking.payment.sol_wallet?
-        redirect_to sol_payment_booking_payment_path(@booking, @booking.payment)
-      else
-        redirect_to villa_booking_path(@villa, @booking), notice: "Đặt phòng thành công."
-      end
+      # Điều hướng đến trang chọn phương thức thanh toán
+      redirect_to choose_payment_method_booking_payment_path(@booking, @booking.payment),
+                  notice: "Đặt phòng thành công. Vui lòng chọn phương thức thanh toán."
     else
       # Đảm bảo payment object tồn tại nếu có lỗi
       @booking.build_payment if @booking.payment.nil?
@@ -56,8 +54,7 @@ class BookingsController < ApplicationController
   def booking_params
     params.require(:booking).permit(
       :check_in,
-      :check_out,
-      payment_attributes: [ :payment_method, :amount, :status ]
+      :check_out
     )
   end
 

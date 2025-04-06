@@ -15,7 +15,11 @@ Rails.application.routes.draw do
       delete 'logout', to: 'sessions#destroy', as: :destroy_session
     end
   end
-  devise_for :users
+  
+  # Sử dụng controller tùy chỉnh cho sessions
+  devise_for :users, controllers: {
+    sessions: 'users/sessions'
+  }
 
   # Routes cho quản lý user
   resources :users

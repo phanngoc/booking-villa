@@ -3,6 +3,9 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
 
   before_action :configure_permitted_parameters, if: :devise_controller?
+  
+  # Thêm log debug cho lỗi đăng nhập
+  before_action :log_devise_sign_in_error, if: :devise_controller?
 
   protected
 
@@ -20,6 +23,28 @@ class ApplicationController < ActionController::Base
   def authenticate_admin
     unless current_admin && current_admin.admin?
       redirect_to admin_new_session_path, alert: "Vui lòng đăng nhập bằng tài khoản quản trị"
+    end
+  end
+  
+  # Ghi log lỗi đăng nhập
+  def log_devise_sign_in_error
+    if params[:controller] == 'devise/sessions' && params[:action] == 'create'
+      user = User.find_by(email: params[:user][:email])
+      
+      # Ghi log thông tin đăng nhập
+      if user
+        Rails.logger.debug("DEVISE DEBUG - Đăng nhập - Email: #{params[:user][:email]}")
+        
+        if !user.confirmed?
+          Rails.logger.debug("DEVISE DEBUG - Tài khoản chưa xác thực email")
+        elsif !user.valid_password?(params[:user][:password])
+          Rails.logger.debug("DEVISE DEBUG - Mật khẩu không chính xác")
+        else
+          Rails.logger.debug("DEVISE DEBUG - Lỗi khác khi đăng nhập")
+        end
+      else
+        Rails.logger.debug("DEVISE DEBUG - Email không tồn tại: #{params[:user][:email]}")
+      end
     end
   end
 end
