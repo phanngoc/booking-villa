@@ -8,8 +8,7 @@ class Villa < ApplicationRecord
   # Enums
   enum status: {
     available: 0,
-    booked: 1,
-    maintenance: 2
+    disabled: 1
   }
 
   # Relationships

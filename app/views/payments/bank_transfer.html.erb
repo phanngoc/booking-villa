@@ -1,0 +1,179 @@
+<%
+  # Tạo nội dung QR code với thông tin chuyển khoản
+  require 'rqrcode'
+  
+  qr_content = "#{@bank_info[:bank_name]}\n"
+  qr_content += "STK: #{@bank_info[:account_number]}\n"
+  qr_content += "Tên: #{@bank_info[:account_name]}\n"
+  qr_content += "Chi nhánh: #{@bank_info[:branch]}\n"
+  qr_content += "Số tiền: #{@bank_info[:amount]}\n"
+  qr_content += "Nội dung: #{@bank_info[:description]}"
+  
+  qrcode = RQRCode::QRCode.new(qr_content)
+  
+  # Tạo SVG từ QR code
+  svg = qrcode.as_svg(
+    color: "000",
+    shape_rendering: "crispEdges",
+    module_size: 4,
+    standalone: true,
+    use_path: true
+  )
+%>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-3xl mx-auto">
+    <h1 class="text-2xl font-semibold text-gray-900 mb-6">Thanh toán chuyển khoản ngân hàng</h1>
+    
+    <div class="bg-white shadow sm:rounded-lg mb-6">
+      <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Chi tiết giao dịch</h3>
+        <div class="flex items-center">
+          <span class="text-sm text-gray-500 mr-2">Thanh toán với</span>
+          <svg class="h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+            <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
+          </svg>
+        </div>
+      </div>
+      <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+        <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Villa</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @booking.villa.name %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Thời gian</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= l @booking.check_in, format: :long %> - <%= l @booking.check_out, format: :long %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Số tiền</dt>
+            <dd class="mt-1 text-sm text-gray-900 font-semibold"><%= number_to_currency(@bank_info[:amount], unit: "₫", format: "%n %u") %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Mã đặt phòng</dt>
+            <dd class="mt-1 text-sm text-gray-900 font-semibold">#<%= @booking.id %></dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+      <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Thông tin chuyển khoản</h3>
+      </div>
+      <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <div class="mb-4">
+              <p class="text-sm text-gray-500 mb-1">Ngân hàng</p>
+              <p class="text-base font-medium"><%= @bank_info[:bank_name] %></p>
+            </div>
+            
+            <div class="mb-4">
+              <p class="text-sm text-gray-500 mb-1">Số tài khoản</p>
+              <div class="flex items-center">
+                <input type="text" id="account-number" value="<%= @bank_info[:account_number] %>" readonly class="bg-gray-50 border-none text-base font-medium focus:ring-0 p-0" />
+                <button type="button" onclick="copyToClipboard('account-number')" class="ml-2 text-blue-600 hover:text-blue-800">
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M8 2a1 1 0 000 2h2a1 1 0 100-2H8z" />
+                    <path d="M3 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v6h-4.586l1.293-1.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L10.414 13H15v3a2 2 0 01-2 2H5a2 2 0 01-2-2V5zM15 11h2a1 1 0 110 2h-2v-2z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <p class="text-sm text-gray-500 mb-1">Tên tài khoản</p>
+              <p class="text-base font-medium"><%= @bank_info[:account_name] %></p>
+            </div>
+            
+            <div class="mb-4">
+              <p class="text-sm text-gray-500 mb-1">Chi nhánh</p>
+              <p class="text-base"><%= @bank_info[:branch] %></p>
+            </div>
+            
+            <div class="mb-4">
+              <p class="text-sm text-gray-500 mb-1">Số tiền</p>
+              <p class="text-base font-medium"><%= number_to_currency(@bank_info[:amount], unit: "₫", format: "%n %u") %></p>
+            </div>
+            
+            <div class="mb-4">
+              <p class="text-sm text-gray-500 mb-1">Nội dung chuyển khoản</p>
+              <div class="flex items-center">
+                <input type="text" id="transfer-content" value="<%= @bank_info[:description] %>" readonly class="bg-gray-50 border-none text-base font-medium focus:ring-0 p-0" />
+                <button type="button" onclick="copyToClipboard('transfer-content')" class="ml-2 text-blue-600 hover:text-blue-800">
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M8 2a1 1 0 000 2h2a1 1 0 100-2H8z" />
+                    <path d="M3 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v6h-4.586l1.293-1.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L10.414 13H15v3a2 2 0 01-2 2H5a2 2 0 01-2-2V5zM15 11h2a1 1 0 110 2h-2v-2z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex flex-col items-center justify-center">
+            <div class="p-2 border border-gray-200 rounded-lg mb-3">
+              <div id="qrcode" class="w-56 h-56 flex items-center justify-center">
+                <%= svg.html_safe %>
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 text-center">Quét mã QR để chuyển khoản</p>
+          </div>
+        </div>
+
+        <div class="rounded-md bg-yellow-50 p-4 mt-6">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-yellow-800">Lưu ý quan trọng</h3>
+              <div class="mt-2 text-sm text-yellow-700">
+                <ul class="list-disc pl-5 space-y-1">
+                  <li>Vui lòng ghi đúng nội dung chuyển khoản</li>
+                  <li>Sau khi chuyển khoản, hãy chụp màn hình giao dịch và gửi vào mục xác nhận bên dưới</li>
+                  <li>Nhân viên của chúng tôi sẽ xác nhận và kích hoạt đặt phòng của bạn trong vòng 24 giờ</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="confirmation-form" class="bg-white shadow sm:rounded-lg mb-6">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Xác nhận thanh toán</h3>
+        <%= form_with(url: booking_payment_path(@booking, @payment), method: :patch, local: true) do |form| %>
+          <div class="mb-4">
+            <label for="transaction_id" class="block text-sm font-medium text-gray-700 mb-1">Mã giao dịch ngân hàng</label>
+            <%= form.text_field :transaction_id, id: "transaction_id", class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md", required: true, placeholder: "Nhập mã giao dịch..." %>
+            <p class="mt-1 text-xs text-gray-500">Bạn có thể tìm mã giao dịch trong ứng dụng ngân hàng sau khi hoàn tất chuyển khoản</p>
+          </div>
+          <%= form.hidden_field :bank_transfer_confirmed, value: "true" %>
+          <%= form.submit "Xác nhận đã chuyển khoản", class: "w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        <% end %>
+      </div>
+    </div>
+    
+    <div class="flex justify-between mt-6">
+      <%= link_to "Quay lại", booking_payment_path(@booking, @payment), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+      
+      <%= link_to "Hủy đặt phòng", villa_booking_path(@booking.villa, @booking), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+    </div>
+  </div>
+</div>
+
+<script>
+  function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    element.select();
+    document.execCommand('copy');
+    
+    // Hiển thị thông báo đã sao chép
+    alert('Đã sao chép thành công');
+  }
+</script>

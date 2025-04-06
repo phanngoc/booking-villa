@@ -19,12 +19,8 @@ class Booking < ApplicationRecord
   has_one :payment, dependent: :destroy
   has_one :review
 
-  # Nested attributes
-  accepts_nested_attributes_for :payment
-
   # Callbacks
   before_validation :calculate_total_price
-  after_create :ensure_payment_exists
 
   # Scopes
   scope :upcoming, -> { where("check_in >= ?", Date.current) }
@@ -42,7 +38,7 @@ class Booking < ApplicationRecord
   def villa_available
     return unless villa && check_in && check_out
     unless villa.available?
-      errors.add(:base, "Villa không khả dụng cho thời gian này")
+      errors.add(:base, "Villa không khả dụng cho việc đặt phòng")
     end
   end
 
@@ -55,23 +51,6 @@ class Booking < ApplicationRecord
 
     if overlapping.exists?
       errors.add(:base, "Villa đã được đặt cho thời gian này")
-    end
-  end
-
-  def ensure_payment_exists
-    # Nếu payment đã được tạo qua nested attributes, cập nhật amount và status
-    if payment
-      payment.update(
-        amount: total_price,
-        status: :pending
-      ) unless payment.persisted?
-    else
-      # Nếu không, tạo mới payment với giá trị mặc định
-      create_payment(
-        amount: total_price,
-        status: :pending,
-        payment_method: :cash # Mặc định là thanh toán tiền mặt
-      )
     end
   end
 end

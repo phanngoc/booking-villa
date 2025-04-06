@@ -47,6 +47,9 @@
                   </button>
 
                   <div class="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 hidden" data-dropdown-target="menu">
+                    <% if current_user.admin? %>
+                      <%= link_to "Trang quản trị", admin_users_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+                    <% end %>
                     <%= button_to destroy_user_session_path, method: :delete, class: "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" do %>
                       Đăng xuất
                     <% end %>
@@ -57,6 +60,7 @@
               <div class="flex items-center space-x-4">
                 <%= link_to "Đăng nhập", new_user_session_path, class: "text-gray-500 hover:text-gray-700" %>
                 <%= link_to "Đăng ký", new_user_registration_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" %>
+                <%= link_to "Admin", admin_new_session_path, class: "ml-2 text-xs text-gray-400 hover:text-gray-600" %>
               </div>
             <% end %>
           </div>

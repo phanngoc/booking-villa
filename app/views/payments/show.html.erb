@@ -63,17 +63,39 @@
                   Chuyển khoản ngân hàng
                 </span>
               <% when 'cash' %>
-                <span class="inline-flex items-center">
-                  <svg class="h-5 w-5 text-gray-400 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                  </svg>
-                  Tiền mặt khi nhận phòng
-                </span>
+                <% if @payment.pending? %>
+                  <%= link_to booking_payment_path(@booking, @payment, confirm_cash: true), method: :patch, class: "inline-flex items-center text-blue-600 hover:text-blue-800" do %>
+                    <svg class="h-5 w-5 text-gray-400 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                    </svg>
+                    Xác nhận thanh toán tiền mặt khi nhận phòng
+                    <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  <% end %>
+                <% else %>
+                  <span class="inline-flex items-center">
+                    <svg class="h-5 w-5 text-gray-400 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                    </svg>
+                    Tiền mặt khi nhận phòng
+                  </span>
+                <% end %>
               <% when 'sol_wallet' %>
-                <span class="inline-flex items-center">
-                  <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo" class="h-5 w-5 mr-1.5">
-                  Thanh toán Solana (SOL)
-                </span>
+                <% if @payment.pending? %>
+                  <%= link_to sol_payment_booking_payment_path(@booking, @payment), class: "inline-flex items-center text-blue-600 hover:text-blue-800" do %>
+                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo" class="h-5 w-5 mr-1.5">
+                    Thanh toán Solana (SOL)
+                    <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  <% end %>
+                <% else %>
+                  <span class="inline-flex items-center">
+                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo" class="h-5 w-5 mr-1.5">
+                    Thanh toán Solana (SOL)
+                  </span>
+                <% end %>
               <% end %>
             </dd>
           </div>

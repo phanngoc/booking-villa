@@ -10,11 +10,23 @@ class PaymentsController < ApplicationController
   end
 
   def update
-    if @payment.update(payment_params)
+    if params[:confirm_cash].present?
+      # Xử lý xác nhận thanh toán tiền mặt
+      @payment.update(status: :completed)
+      @booking.confirmed!
+      redirect_to booking_payment_path(@booking, @payment), notice: "Đã xác nhận thanh toán tiền mặt khi nhận phòng"
+    elsif params[:bank_transfer_confirmed].present? && params[:transaction_id].present?
+      # Xử lý xác nhận thanh toán chuyển khoản ngân hàng
+      @payment.update(
+        transaction_id: params[:transaction_id],
+        status: :pending # Đợi admin xác nhận
+      )
+      redirect_to booking_payment_path(@booking, @payment), notice: "Đã ghi nhận thông tin thanh toán của bạn. Chúng tôi sẽ xác nhận trong thời gian sớm nhất!"
+    elsif @payment.update(payment_params)
       if payment_params[:payment_method] == "sol_wallet"
         redirect_to sol_payment_booking_payment_path(@booking, @payment)
       else
-        redirect_to booking_payment_path(@booking, @payment), notice: "Ph\u01B0\u01A1ng th\u1EE9c thanh to\u00E1n \u0111\u00E3 \u0111\u01B0\u1EE3c c\u1EADp nh\u1EADt"
+        redirect_to booking_payment_path(@booking, @payment), notice: "Phương thức thanh toán đã được cập nhật"
       end
     else
       render :choose_payment_method, status: :unprocessable_entity
@@ -22,6 +34,9 @@ class PaymentsController < ApplicationController
   end
 
   def sol_payment
+    # Đảm bảo payment method được đặt thành sol_wallet
+    @payment.update(payment_method: :sol_wallet) unless @payment.sol_wallet?
+
     # Tính toán số lượng SOL và lấy địa chỉ ví
     @sol_amount = calculate_sol_amount(@payment.amount)
     @payment_address = generate_payment_address
@@ -33,6 +48,21 @@ class PaymentsController < ApplicationController
     )
   end
 
+  def bank_transfer
+    # Đảm bảo payment method được đặt thành bank_transfer
+    @payment.update(payment_method: :bank_transfer) unless @payment.bank_transfer?
+
+    # Thông tin ngân hàng để hiển thị
+    @bank_info = {
+      bank_name: "Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank)",
+      account_number: "1234567890",
+      account_name: "CÔNG TY TNHH VILLA BOOKING",
+      branch: "Hồ Chí Minh",
+      amount: @payment.amount,
+      description: "Thanh toan dat phong #{@booking.id}"
+    }
+  end
+
   def verify_sol_payment
     # Lấy thông tin từ form
     transaction_signature = params[:signature]
@@ -41,10 +71,10 @@ class PaymentsController < ApplicationController
     if SolanaService.verify_transaction(transaction_signature, @payment.payment_address, @payment.sol_amount)
       @payment.transaction_id = transaction_signature
       @payment.completed!
-      redirect_to booking_path(@booking), notice: "Thanh to\u00E1n th\u00E0nh c\u00F4ng!"
+      redirect_to booking_path(@booking), notice: "Thanh toán thành công!"
     else
       @payment.failed!
-      redirect_to booking_path(@booking), alert: "Thanh to\u00E1n th\u1EA5t b\u1EA1i. Vui l\u00F2ng th\u1EED l\u1EA1i."
+      redirect_to booking_path(@booking), alert: "Thanh toán thất bại. Vui lòng thử lại."
     end
   end
 

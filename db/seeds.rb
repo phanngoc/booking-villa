@@ -17,6 +17,9 @@ Amenity.delete_all
 Villa.delete_all
 # User.delete_all
 
+# Load seeds cho Member
+load(Rails.root.join('db', 'seeds', 'members.rb'))
+
 # Tạo user đầu tiên
 # user = User.create!(
 #   email: 'test@example.com',
@@ -202,3 +205,41 @@ puts "Đang tạo dữ liệu mẫu..."
 end
 
 puts "Hoàn thành! Đã tạo #{Villa.count} villa với dữ liệu mẫu và #{VillaAmenity.count} tiện ích villa."
+
+# Tạo tài khoản admin
+puts "Tạo tài khoản quản trị..."
+
+members = [
+  { 
+    email: 'admin@example.com', 
+    password: 'password123', 
+    name: 'Quản trị viên', 
+    role: 'admin' 
+  },
+  { 
+    email: 'manager@example.com', 
+    password: 'password123', 
+    name: 'Quản lý', 
+    role: 'manager' 
+  },
+  { 
+    email: 'staff@example.com', 
+    password: 'password123', 
+    name: 'Nhân viên', 
+    role: 'staff' 
+  }
+]
+
+members.each do |member_data|
+  member = Member.find_or_initialize_by(email: member_data[:email])
+  member.password = member_data[:password]
+  member.name = member_data[:name]
+  member.role = member_data[:role]
+  if member.save
+    puts "  Đã tạo thành công tài khoản #{member.role}: #{member.email}"
+  else
+    puts "  Không thể tạo tài khoản #{member_data[:email]}: #{member.errors.full_messages.join(', ')}"
+  end
+end
+
+puts "Hoàn thành việc tạo dữ liệu!"

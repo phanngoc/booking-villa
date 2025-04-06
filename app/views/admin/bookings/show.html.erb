@@ -1,0 +1,180 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Chi tiết đặt phòng #<%= @booking.id %></h1>
+    <div>
+      <%= link_to admin_bookings_path, class: "btn btn-outline-secondary" do %>
+        <i class="bi bi-arrow-left"></i> Quay lại
+      <% end %>
+      <%= link_to edit_admin_booking_path(@booking), class: "btn btn-warning ms-2" do %>
+        <i class="bi bi-pencil"></i> Chỉnh sửa
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Thông tin đặt phòng</h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">ID đặt phòng</p>
+              <p class="fw-bold"><%= @booking.id %></p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Trạng thái</p>
+              <p>
+                <span class="badge bg-<%= booking_status_color(@booking.status) %> p-2">
+                  <%= t("bookings.status.#{@booking.status}") %>
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Ngày nhận phòng</p>
+              <p class="fw-bold"><%= l @booking.check_in, format: :long %></p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Ngày trả phòng</p>
+              <p class="fw-bold"><%= l @booking.check_out, format: :long %></p>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Số đêm</p>
+              <p class="fw-bold"><%= (@booking.check_out - @booking.check_in).to_i %> đêm</p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Tổng tiền</p>
+              <p class="fw-bold fs-5 text-success">
+                <%= number_to_currency(@booking.total_price, unit: "₫", delimiter: ".", precision: 0) %>
+              </p>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Ngày đặt phòng</p>
+              <p class="fw-bold"><%= l @booking.created_at, format: :long %></p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Ngày cập nhật cuối</p>
+              <p class="fw-bold"><%= l @booking.updated_at, format: :long %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Thông tin thanh toán</h5>
+        </div>
+        <div class="card-body">
+          <% if @booking.payment.present? %>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <p class="mb-1 text-muted small">Phương thức thanh toán</p>
+                <p class="fw-bold">
+                  <%= t("payments.method.#{@booking.payment.payment_method}") %>
+                </p>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-1 text-muted small">Trạng thái thanh toán</p>
+                <p>
+                  <span class="badge bg-<%= payment_status_color(@booking.payment.status) %> p-2">
+                    <%= t("payments.status.#{@booking.payment.status}") %>
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <p class="mb-1 text-muted small">Số tiền</p>
+                <p class="fw-bold fs-5 text-success">
+                  <%= number_to_currency(@booking.payment.amount, unit: "₫", delimiter: ".", precision: 0) %>
+                </p>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-1 text-muted small">Thời gian thanh toán</p>
+                <p class="fw-bold">
+                  <% if @booking.payment.completed_at.present? %>
+                    <%= l @booking.payment.completed_at, format: :long %>
+                  <% else %>
+                    <span class="text-muted">Chưa thanh toán</span>
+                  <% end %>
+                </p>
+              </div>
+            </div>
+          <% else %>
+            <p class="text-center text-muted">Không có thông tin thanh toán.</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Thông tin khách hàng</h5>
+        </div>
+        <div class="card-body">
+          <p class="mb-1 text-muted small">Tên khách hàng</p>
+          <p class="fw-bold"><%= @booking.user.name %></p>
+          
+          <p class="mb-1 text-muted small">Email</p>
+          <p class="fw-bold"><%= @booking.user.email %></p>
+          
+          <p class="mb-1 text-muted small">Số điện thoại</p>
+          <p class="fw-bold">
+            <% if @booking.user.phone.present? %>
+              <%= @booking.user.phone %>
+            <% else %>
+              <span class="text-muted">Chưa cung cấp</span>
+            <% end %>
+          </p>
+          
+          <div class="mt-3">
+            <%= link_to admin_user_path(@booking.user), class: "btn btn-sm btn-outline-primary w-100" do %>
+              <i class="bi bi-person"></i> Xem thông tin chi tiết
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Thông tin villa</h5>
+        </div>
+        <div class="card-body">
+          <% if @booking.villa.featured_image.present? %>
+            <div class="mb-3">
+              <%= image_tag @booking.villa.featured_image.url, class: "img-fluid rounded" %>
+            </div>
+          <% end %>
+          
+          <p class="mb-1 text-muted small">Tên villa</p>
+          <p class="fw-bold"><%= @booking.villa.name %></p>
+          
+          <p class="mb-1 text-muted small">Địa chỉ</p>
+          <p class="fw-bold"><%= @booking.villa.address %></p>
+          
+          <p class="mb-1 text-muted small">Giá mỗi đêm</p>
+          <p class="fw-bold">
+            <%= number_to_currency(@booking.villa.price, unit: "₫", delimiter: ".", precision: 0) %>
+          </p>
+          
+          <div class="mt-3">
+            <%= link_to villa_path(@booking.villa), class: "btn btn-sm btn-outline-primary w-100", target: "_blank" do %>
+              <i class="bi bi-house"></i> Xem trang villa
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

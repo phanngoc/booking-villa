@@ -1,2 +1,104 @@
-<h1>Admin::Users#show</h1>
-<p>Find me in app/views/admin/users/show.html.erb</p>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Chi tiết người dùng</h1>
+    <%= link_to "Trở về danh sách", admin_users_path, class: "btn btn-outline-secondary" %>
+  </div>
+  
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">Thông tin người dùng #<%= @user.id %></h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <table class="table">
+            <tbody>
+              <tr>
+                <th style="width: 30%">Email:</th>
+                <td><%= @user.email %></td>
+              </tr>
+              <tr>
+                <th>Tên:</th>
+                <td><%= @user.name.presence || "(Chưa cập nhật)" %></td>
+              </tr>
+              <tr>
+                <th>Ngày đăng ký:</th>
+                <td><%= l @user.created_at, format: :long %></td>
+              </tr>
+              <tr>
+                <th>Cập nhật gần nhất:</th>
+                <td><%= l @user.updated_at, format: :long %></td>
+              </tr>
+              <tr>
+                <th>Trạng thái email:</th>
+                <td>
+                  <% if @user.confirmed? %>
+                    <span class="badge bg-success">Đã xác nhận</span>
+                    <% if @user.confirmed_at %>
+                      <small class="text-muted d-block mt-1">
+                        Xác nhận lúc: <%= l @user.confirmed_at, format: :long %>
+                      </small>
+                    <% end %>
+                  <% else %>
+                    <span class="badge bg-warning text-dark">Chưa xác nhận</span>
+                  <% end %>
+                </td>
+              </tr>
+              <tr>
+                <th>Quyền:</th>
+                <td>
+                  <% if @user.admin? %>
+                    <span class="badge bg-info">Admin</span>
+                  <% else %>
+                    <span class="badge bg-secondary">Người dùng</span>
+                  <% end %>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="card h-100">
+            <div class="card-header">
+              <h5 class="mb-0">Hoạt động đặt phòng</h5>
+            </div>
+            <div class="card-body">
+              <% if @user.bookings.any? %>
+                <div class="list-group">
+                  <% @user.bookings.order(created_at: :desc).limit(5).each do |booking| %>
+                    <div class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <h6 class="mb-1"><%= booking.villa.name rescue "Villa đã bị xóa" %></h6>
+                        <small><%= l booking.created_at, format: :short %></small>
+                      </div>
+                      <p class="mb-1">
+                        Ngày: <%= l booking.check_in_date, format: :short if booking.check_in_date %> 
+                        → <%= l booking.check_out_date, format: :short if booking.check_out_date %>
+                      </p>
+                      <small class="text-muted">
+                        Trạng thái: 
+                        <span class="badge <%= booking.status == 'confirmed' ? 'bg-success' : (booking.status == 'pending' ? 'bg-warning text-dark' : 'bg-danger') %>">
+                          <%= t("bookings.status.#{booking.status}", default: booking.status) %>
+                        </span>
+                      </small>
+                    </div>
+                  <% end %>
+                </div>
+                <% if @user.bookings.count > 5 %>
+                  <div class="text-center mt-3">
+                    <small class="text-muted">Hiển thị 5 đặt phòng gần nhất</small>
+                  </div>
+                <% end %>
+              <% else %>
+                <div class="alert alert-info">
+                  Người dùng chưa có đặt phòng nào.
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
