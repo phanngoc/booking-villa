@@ -1,0 +1,124 @@
+<div class="container mt-4">
+  <h1>Quản lý đặt phòng</h1>
+
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Bộ lọc</h5>
+    </div>
+    <div class="card-body">
+      <%= search_form_for @q, url: admin_bookings_path do |f| %>
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <%= f.label :status_eq, "Trạng thái" %>
+            <%= f.select :status_eq, Booking.statuses.map { |k, v| [k.humanize, v] }, 
+                          { include_blank: "Tất cả" }, class: "form-select" %>
+          </div>
+          <div class="col-md-3 mb-3">
+            <%= f.label :check_in_gteq, "Từ ngày" %>
+            <%= f.date_field :check_in_gteq, class: "form-control" %>
+          </div>
+          <div class="col-md-3 mb-3">
+            <%= f.label :check_out_lteq, "Đến ngày" %>
+            <%= f.date_field :check_out_lteq, class: "form-control" %>
+          </div>
+          <div class="col-md-3 mb-3">
+            <%= f.label :villa_name_cont, "Tên villa" %>
+            <%= f.text_field :villa_name_cont, class: "form-control" %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <%= f.label :user_email_cont, "Email khách hàng" %>
+            <%= f.text_field :user_email_cont, class: "form-control" %>
+          </div>
+          <div class="col-md-3 mb-3">
+            <%= f.label :total_price_gteq, "Giá thấp nhất" %>
+            <%= f.number_field :total_price_gteq, class: "form-control" %>
+          </div>
+          <div class="col-md-3 mb-3">
+            <%= f.label :total_price_lteq, "Giá cao nhất" %>
+            <%= f.number_field :total_price_lteq, class: "form-control" %>
+          </div>
+          <div class="col-md-3 mb-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2">
+              <i class="bi bi-search"></i> Tìm kiếm
+            </button>
+            <%= link_to admin_bookings_path, class: "btn btn-secondary" do %>
+              <i class="bi bi-arrow-counterclockwise"></i> Đặt lại
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Danh sách đặt phòng</h5>
+      <small>Tổng số: <%= @bookings.total_count %> đặt phòng</small>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped mb-0">
+          <thead class="table-light">
+            <tr>
+              <th><%= sort_link(@q, :id, 'ID') %></th>
+              <th><%= sort_link(@q, :user_name, 'Khách hàng') %></th>
+              <th><%= sort_link(@q, :villa_name, 'Villa') %></th>
+              <th><%= sort_link(@q, :check_in, 'Ngày nhận phòng') %></th>
+              <th><%= sort_link(@q, :check_out, 'Ngày trả phòng') %></th>
+              <th><%= sort_link(@q, :total_price, 'Tổng tiền') %></th>
+              <th><%= sort_link(@q, :status, 'Trạng thái') %></th>
+              <th><%= sort_link(@q, :created_at, 'Ngày đặt') %></th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if @bookings.any? %>
+              <% @bookings.each do |booking| %>
+                <tr>
+                  <td><%= booking.id %></td>
+                  <td><%= booking.user.name %></td>
+                  <td><%= booking.villa.name %></td>
+                  <td><%= l booking.check_in, format: :short %></td>
+                  <td><%= l booking.check_out, format: :short %></td>
+                  <td><%= number_to_currency(booking.total_price, unit: "₫", delimiter: ".", precision: 0) %></td>
+                  <td>
+                    <span class="badge bg-<%= booking_status_color(booking.status) %>">
+                      <%= t("bookings.status.#{booking.status}") %>
+                    </span>
+                  </td>
+                  <td><%= l booking.created_at, format: :short %></td>
+                  <td>
+                    <div class="btn-group">
+                      <%= link_to admin_booking_path(booking), class: "btn btn-sm btn-info" do %>
+                        <i class="bi bi-eye"></i>
+                      <% end %>
+                      <%= link_to edit_admin_booking_path(booking), class: "btn btn-sm btn-warning" do %>
+                        <i class="bi bi-pencil"></i>
+                      <% end %>
+                      <%= button_to admin_booking_path(booking), method: :delete, 
+                                   class: "btn btn-sm btn-danger", 
+                                   form: { data: { turbo_confirm: "Bạn có chắc chắn muốn xóa đặt phòng này?" } } do %>
+                        <i class="bi bi-trash"></i>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr>
+                <td colspan="9" class="text-center py-4">Không có đặt phòng nào.</td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer">
+      <div class="d-flex justify-content-center">
+        <%= paginate @bookings, theme: 'bootstrap-5' %>
+      </div>
+    </div>
+  </div>
+</div> 

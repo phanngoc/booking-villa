@@ -4,15 +4,16 @@ Rails.application.routes.draw do
   get "villas/index"
   get "villas/show"
   namespace :admin do
-    get "filter_fields/index"
-    get "filter_fields/new"
-    get "filter_fields/create"
-    get "filter_fields/edit"
-    get "filter_fields/update"
-    get "filter_fields/destroy"
-    get "users/index"
-    get "users/show"
+    resources :users
     resources :filter_fields
+    resources :bookings
+    
+    # Routes cho admin đăng nhập
+    devise_scope :user do
+      get 'login', to: 'sessions#new', as: :new_session
+      post 'login', to: 'sessions#create', as: :session
+      delete 'logout', to: 'sessions#destroy', as: :destroy_session
+    end
   end
   devise_for :users
 
