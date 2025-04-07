@@ -7,18 +7,19 @@ Rails.application.routes.draw do
     resources :users
     resources :filter_fields
     resources :bookings
-    
+
     # Routes cho admin đăng nhập
     devise_scope :user do
-      get 'login', to: 'sessions#new', as: :new_session
-      post 'login', to: 'sessions#create', as: :session
-      delete 'logout', to: 'sessions#destroy', as: :destroy_session
+      get "login", to: "sessions#new", as: :new_session
+      post "login", to: "sessions#create", as: :session
+      delete "logout", to: "sessions#destroy", as: :destroy_session
     end
   end
-  
-  # Sử dụng controller tùy chỉnh cho sessions
+
+  # Sử dụng controller tùy chỉnh cho sessions và omniauth callbacks
   devise_for :users, controllers: {
-    sessions: 'users/sessions'
+    sessions: "users/sessions",
+    omniauth_callbacks: "users/omniauth_callbacks"
   }
 
   # Routes cho quản lý user

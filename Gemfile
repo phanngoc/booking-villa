@@ -68,3 +68,8 @@ gem "kaminari", "~> 1.2" # Phân trang
 # Gem cho thanh toán tiền điện tử
 gem "rqrcode", "~> 2.1" # Tạo QR code
 gem "httparty", "~> 0.21.0" # HTTP client đơn giản
+
+# Thêm các gem cho SSO
+gem "omniauth"
+gem "omniauth-google-oauth2"
+gem "omniauth-rails_csrf_protection" # Bảo vệ CSRF khi sử dụng OmniAuth

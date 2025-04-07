@@ -50,7 +50,7 @@
                     <% if current_user.admin? %>
                       <%= link_to "Trang quản trị", admin_users_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
                     <% end %>
-                    <%= button_to destroy_user_session_path, method: :delete, class: "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" do %>
+                    <%= button_to destroy_user_session_path, method: :delete, data: { controller: "logout" }, class: "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" do %>
                       Đăng xuất
                     <% end %>
                   </div>
