@@ -45,57 +45,61 @@
           <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">Phương thức</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <% case @payment.payment_method %>
-              <% when 'credit_card' %>
-                <span class="inline-flex items-center">
-                  <svg class="h-5 w-5 text-gray-400 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                    <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
-                  </svg>
-                  Thẻ tín dụng / Thẻ ghi nợ
-                </span>
-              <% when 'bank_transfer' %>
-                <span class="inline-flex items-center">
-                  <svg class="h-5 w-5 text-gray-400 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                    <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
-                  </svg>
-                  Chuyển khoản ngân hàng
-                </span>
-              <% when 'cash' %>
-                <% if @payment.pending? %>
-                  <%= link_to booking_payment_path(@booking, @payment, confirm_cash: true), method: :patch, class: "inline-flex items-center text-blue-600 hover:text-blue-800" do %>
-                    <svg class="h-5 w-5 text-gray-400 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                    </svg>
-                    Xác nhận thanh toán tiền mặt khi nhận phòng
-                    <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                  <% end %>
-                <% else %>
+              <% if @payment.payment_method.present? %>
+                <% case @payment.payment_method.name %>
+                <% when 'credit_card' %>
                   <span class="inline-flex items-center">
                     <svg class="h-5 w-5 text-gray-400 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                      <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                      <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
                     </svg>
-                    Tiền mặt khi nhận phòng
+                    Thẻ tín dụng / Thẻ ghi nợ
                   </span>
-                <% end %>
-              <% when 'sol_wallet' %>
-                <% if @payment.pending? %>
-                  <%= link_to sol_payment_booking_payment_path(@booking, @payment), class: "inline-flex items-center text-blue-600 hover:text-blue-800" do %>
-                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo" class="h-5 w-5 mr-1.5">
-                    Thanh toán Solana (SOL)
-                    <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                  <% end %>
-                <% else %>
+                <% when 'bank_transfer' %>
                   <span class="inline-flex items-center">
-                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo" class="h-5 w-5 mr-1.5">
-                    Thanh toán Solana (SOL)
+                    <svg class="h-5 w-5 text-gray-400 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                      <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
+                    </svg>
+                    Chuyển khoản ngân hàng
                   </span>
+                <% when 'cash' %>
+                  <% if @payment.pending? %>
+                    <%= link_to booking_payment_path(@booking, @payment, confirm_cash: true), method: :patch, class: "inline-flex items-center text-blue-600 hover:text-blue-800" do %>
+                      <svg class="h-5 w-5 text-gray-400 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                      </svg>
+                      Xác nhận thanh toán tiền mặt khi nhận phòng
+                      <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                      </svg>
+                    <% end %>
+                  <% else %>
+                    <span class="inline-flex items-center">
+                      <svg class="h-5 w-5 text-gray-400 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                      </svg>
+                      Tiền mặt khi nhận phòng
+                    </span>
+                  <% end %>
+                <% when 'sol_wallet' %>
+                  <% if @payment.pending? %>
+                    <%= link_to sol_payment_booking_payment_path(@booking, @payment), class: "inline-flex items-center text-blue-600 hover:text-blue-800" do %>
+                      <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo" class="h-5 w-5 mr-1.5">
+                      Thanh toán Solana (SOL)
+                      <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                      </svg>
+                    <% end %>
+                  <% else %>
+                    <span class="inline-flex items-center">
+                      <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo" class="h-5 w-5 mr-1.5">
+                      Thanh toán Solana (SOL)
+                    </span>
+                  <% end %>
                 <% end %>
+              <% else %>
+                <span class="text-gray-400">Chưa chọn</span>
               <% end %>
             </dd>
           </div>
@@ -127,7 +131,7 @@
             <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt class="text-sm font-medium text-gray-500">Mã giao dịch</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                <% if @payment.payment_method == 'sol_wallet' %>
+                <% if @payment.sol_wallet? %>
                   <a href="https://explorer.solana.com/tx/<%= @payment.transaction_id %>" target="_blank" class="text-blue-600 hover:text-blue-800 break-all">
                     <%= @payment.transaction_id %>
                     <svg class="inline-block h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -157,17 +161,145 @@
     </div>
     
     <% if @payment.pending? %>
+      <% if @payment.payment_method.nil? %>
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+          <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Chọn phương thức thanh toán</h3>
+          </div>
+          <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+            <div class="text-center">
+              <%= link_to "Chọn phương thức thanh toán", choose_payment_method_booking_payment_path(@booking, @payment), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            </div>
+          </div>
+        </div>
+      <% elsif @payment.sol_wallet? %>
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+          <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Thanh toán bằng Solana (SOL)</h3>
+          </div>
+          <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+            <div class="text-center">
+              <p class="mb-4 text-gray-700">Kết nối ví Solana của bạn để thanh toán ngay</p>
+              <%= link_to sol_payment_booking_payment_path(@booking, @payment), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo" class="h-5 w-5 mr-1.5">
+                Kết nối và thanh toán
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% elsif @payment.bank_transfer? %>
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+          <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Thanh toán chuyển khoản</h3>
+          </div>
+          <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+            <div class="text-center">
+              <div class="mb-4">
+                <h4 class="text-md font-medium text-gray-700 mb-2">Thông tin chuyển khoản</h4>
+                <p class="text-sm text-gray-600 mb-1">Ngân hàng: Vietcombank</p>
+                <p class="text-sm text-gray-600 mb-1">Số tài khoản: 1234567890</p>
+                <p class="text-sm text-gray-600 mb-1">Chủ tài khoản: CÔNG TY TNHH VILLA BOOKING</p>
+                <p class="text-sm text-gray-600 mb-1">Số tiền: <%= number_to_currency(@payment.amount, unit: "₫", format: "%n %u") %></p>
+                <p class="text-sm text-gray-600 mb-3">Nội dung: Dat phong <%= @booking.id %></p>
+              </div>
+              <div class="mb-4">
+                <div class="bg-gray-100 p-4 mx-auto w-48 h-48 flex items-center justify-center">
+                  <!-- QR code placeholder - trong thực tế sẽ là hình QR code thật -->
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<%= CGI.escape("Vietcombank|1234567890|CONG TY TNHH VILLA BOOKING|#{@payment.amount}|Dat phong #{@booking.id}") %>" alt="QR Code" class="w-full h-full">
+                </div>
+                <p class="mt-2 text-xs text-gray-500">Quét mã QR bằng ứng dụng ngân hàng để thanh toán</p>
+              </div>
+              
+              <div class="mt-4">
+                <form action="<%= booking_payment_path(@booking, @payment) %>" method="post" class="space-y-4">
+                  <input type="hidden" name="_method" value="patch">
+                  <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+                  <input type="hidden" name="bank_transfer_confirmed" value="true">
+                  
+                  <div>
+                    <label for="transaction_id" class="block text-sm font-medium text-gray-700 text-left">Mã giao dịch</label>
+                    <input type="text" name="transaction_id" id="transaction_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Nhập mã giao dịch của bạn">
+                  </div>
+                  
+                  <div>
+                    <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                      Xác nhận đã thanh toán
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% elsif @payment.cash? %>
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+          <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Thanh toán tiền mặt</h3>
+          </div>
+          <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+            <div class="text-center">
+              <p class="mb-4 text-gray-700">Bạn sẽ thanh toán tiền mặt khi nhận phòng</p>
+              <%= link_to booking_payment_path(@booking, @payment, confirm_cash: true), method: :patch, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                <svg class="h-5 w-5 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Xác nhận thanh toán tiền mặt khi nhận phòng
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+          <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Chọn phương thức thanh toán</h3>
+          </div>
+          <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+            <div class="text-center">
+              <div class="p-4 mb-4 text-sm text-yellow-700 bg-yellow-100 rounded-lg">
+                <p>Phương thức thanh toán chưa được cấu hình đúng. Vui lòng chọn lại.</p>
+              </div>
+              <%= link_to "Chọn phương thức thanh toán", choose_payment_method_booking_payment_path(@booking, @payment), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% elsif @payment.completed? %>
       <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
         <div class="px-4 py-5 sm:px-6">
-          <h3 class="text-lg leading-6 font-medium text-gray-900">Hành động</h3>
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Thanh toán đã hoàn tất</h3>
         </div>
         <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
           <div class="text-center">
-            <% if @payment.payment_method.nil? %>
-              <%= link_to "Chọn phương thức thanh toán", choose_payment_method_booking_payment_path(@booking, @payment), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
-            <% elsif @payment.payment_method == 'sol_wallet' %>
-              <%= link_to "Tiếp tục thanh toán Solana", sol_payment_booking_payment_path(@booking, @payment), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
-            <% end %>
+            <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg">
+              <p>Thanh toán của bạn đã được xác nhận. Cảm ơn bạn đã đặt phòng!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% elsif @payment.failed? %>
+      <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+        <div class="px-4 py-5 sm:px-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Thanh toán thất bại</h3>
+        </div>
+        <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+          <div class="text-center">
+            <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+              <p>Thanh toán của bạn không thành công. Vui lòng liên hệ với chúng tôi để được hỗ trợ.</p>
+            </div>
+            <%= link_to "Thử lại", choose_payment_method_booking_payment_path(@booking, @payment), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          </div>
+        </div>
+      </div>
+    <% elsif @payment.refunded? %>
+      <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+        <div class="px-4 py-5 sm:px-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Thanh toán đã hoàn tiền</h3>
+        </div>
+        <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+          <div class="text-center">
+            <div class="p-4 mb-4 text-sm text-gray-700 bg-gray-100 rounded-lg">
+              <p>Thanh toán của bạn đã được hoàn tiền.</p>
+            </div>
           </div>
         </div>
       </div>

@@ -32,6 +32,9 @@ Rails.application.routes.draw do
 
   # Routes cho booking
   resources :bookings do
+    member do
+      post :cancel
+    end
     resource :payment, only: [ :show, :update ] do
       get :choose_payment_method
       get :sol_payment

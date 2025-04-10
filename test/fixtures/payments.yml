@@ -3,13 +3,13 @@
 one:
   booking: one
   amount: 9.99
-  payment_method: MyString
+  payment_method_id: 1
   status: 1
   transaction_id: MyString
 
 two:
   booking: two
   amount: 9.99
-  payment_method: MyString
+  payment_method_id: 2
   status: 1
   transaction_id: MyString

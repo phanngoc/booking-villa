@@ -11,7 +11,7 @@ class Booking < ApplicationRecord
     confirmed: 1,
     completed: 2,
     cancelled: 3
-  }
+  }, _default: :pending
 
   # Relationships
   belongs_to :user

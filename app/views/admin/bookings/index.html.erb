@@ -9,14 +9,26 @@
       <%= search_form_for @q, url: admin_bookings_path do |f| %>
         <div class="row">
           <div class="col-md-3 mb-3">
-            <%= f.label :status_eq, "Trạng thái" %>
+            <%= f.label :status_eq, "Trạng thái đặt phòng" %>
             <%= f.select :status_eq, Booking.statuses.map { |k, v| [k.humanize, v] }, 
+                          { include_blank: "Tất cả" }, class: "form-select" %>
+          </div>
+          <div class="col-md-3 mb-3">
+            <%= f.label :payment_status_eq, "Trạng thái thanh toán" %>
+            <%= f.select :payment_status_eq, Payment.statuses.map { |k, v| [k.humanize, v] }, 
+                          { include_blank: "Tất cả" }, class: "form-select" %>
+          </div>
+          <div class="col-md-3 mb-3">
+            <%= f.label :payment_payment_method_eq, "Phương thức thanh toán" %>
+            <%= f.select :payment_payment_method_eq, Payment.payment_methods.map { |k, v| [k.humanize, v] }, 
                           { include_blank: "Tất cả" }, class: "form-select" %>
           </div>
           <div class="col-md-3 mb-3">
             <%= f.label :check_in_gteq, "Từ ngày" %>
             <%= f.date_field :check_in_gteq, class: "form-control" %>
           </div>
+        </div>
+        <div class="row">
           <div class="col-md-3 mb-3">
             <%= f.label :check_out_lteq, "Đến ngày" %>
             <%= f.date_field :check_out_lteq, class: "form-control" %>
@@ -25,8 +37,6 @@
             <%= f.label :villa_name_cont, "Tên villa" %>
             <%= f.text_field :villa_name_cont, class: "form-control" %>
           </div>
-        </div>
-        <div class="row">
           <div class="col-md-3 mb-3">
             <%= f.label :user_email_cont, "Email khách hàng" %>
             <%= f.text_field :user_email_cont, class: "form-control" %>
@@ -35,9 +45,19 @@
             <%= f.label :total_price_gteq, "Giá thấp nhất" %>
             <%= f.number_field :total_price_gteq, class: "form-control" %>
           </div>
+        </div>
+        <div class="row">
           <div class="col-md-3 mb-3">
             <%= f.label :total_price_lteq, "Giá cao nhất" %>
             <%= f.number_field :total_price_lteq, class: "form-control" %>
+          </div>
+          <div class="col-md-3 mb-3">
+            <%= f.label :created_at_gteq, "Ngày đặt từ" %>
+            <%= f.date_field :created_at_gteq, class: "form-control" %>
+          </div>
+          <div class="col-md-3 mb-3">
+            <%= f.label :created_at_lteq, "Ngày đặt đến" %>
+            <%= f.date_field :created_at_lteq, class: "form-control" %>
           </div>
           <div class="col-md-3 mb-3 d-flex align-items-end">
             <button type="submit" class="btn btn-primary me-2">
@@ -68,7 +88,9 @@
               <th><%= sort_link(@q, :check_in, 'Ngày nhận phòng') %></th>
               <th><%= sort_link(@q, :check_out, 'Ngày trả phòng') %></th>
               <th><%= sort_link(@q, :total_price, 'Tổng tiền') %></th>
-              <th><%= sort_link(@q, :status, 'Trạng thái') %></th>
+              <th><%= sort_link(@q, :status, 'Trạng thái đặt phòng') %></th>
+              <th><%= sort_link(@q, :payment_status, 'Trạng thái thanh toán') %></th>
+              <th><%= sort_link(@q, :payment_payment_method, 'Phương thức thanh toán') %></th>
               <th><%= sort_link(@q, :created_at, 'Ngày đặt') %></th>
               <th>Hành động</th>
             </tr>
@@ -87,6 +109,22 @@
                     <span class="badge bg-<%= booking_status_color(booking.status) %>">
                       <%= t("bookings.status.#{booking.status}") %>
                     </span>
+                  </td>
+                  <td>
+                    <% if booking.payment.present? %>
+                      <span class="badge bg-<%= payment_status_color(booking.payment.status) %>">
+                        <%= t("payments.status.#{booking.payment.status}") %>
+                      </span>
+                    <% else %>
+                      <span class="badge bg-secondary">Chưa có thanh toán</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if booking.payment.present? %>
+                      <%= t("payments.payment_method.#{booking.payment.payment_method}") %>
+                    <% else %>
+                      <span class="text-muted">-</span>
+                    <% end %>
                   </td>
                   <td><%= l booking.created_at, format: :short %></td>
                   <td>
@@ -108,7 +146,7 @@
               <% end %>
             <% else %>
               <tr>
-                <td colspan="9" class="text-center py-4">Không có đặt phòng nào.</td>
+                <td colspan="11" class="text-center py-4">Không có đặt phòng nào.</td>
               </tr>
             <% end %>
           </tbody>

@@ -43,34 +43,20 @@
         </div>
         <div class="border-t border-gray-200">
           <div class="px-4 py-5 space-y-4">
-            <div class="flex items-center">
-              <%= form.radio_button :payment_method, :credit_card, class: "h-4 w-4 text-blue-600 focus:ring-blue-500" %>
-              <label for="payment_payment_method_credit_card" class="ml-3 block text-sm font-medium text-gray-700">
-                Thẻ tín dụng / Thẻ ghi nợ
-              </label>
-            </div>
-            
-            <div class="flex items-center">
-              <%= form.radio_button :payment_method, :bank_transfer, class: "h-4 w-4 text-blue-600 focus:ring-blue-500" %>
-              <label for="payment_payment_method_bank_transfer" class="ml-3 block text-sm font-medium text-gray-700">
-                Chuyển khoản ngân hàng
-              </label>
-            </div>
-            
-            <div class="flex items-center">
-              <%= form.radio_button :payment_method, :cash, class: "h-4 w-4 text-blue-600 focus:ring-blue-500" %>
-              <label for="payment_payment_method_cash" class="ml-3 block text-sm font-medium text-gray-700">
-                Tiền mặt khi nhận phòng
-              </label>
-            </div>
-            
-            <div class="flex items-center">
-              <%= form.radio_button :payment_method, :sol_wallet, class: "h-4 w-4 text-blue-600 focus:ring-blue-500" %>
-              <label for="payment_payment_method_sol_wallet" class="ml-3 flex items-center text-sm font-medium text-gray-700">
-                <span>Thanh toán bằng Solana (SOL)</span>
-                <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana Logo" class="h-5 w-5 ml-2">
-              </label>
-            </div>
+            <% @payment_methods.each do |method| %>
+              <div class="flex items-center">
+                <%= form.radio_button :payment_method_id, method.id, class: "h-4 w-4 text-blue-600 focus:ring-blue-500" %>
+                <label for="payment_payment_method_id_<%= method.id %>" class="ml-3 block text-sm font-medium text-gray-700">
+                  <% if method.icon.present? %>
+                    <img src="<%= method.icon %>" alt="<%= method.name %>" class="h-5 w-5 inline-block mr-2">
+                  <% end %>
+                  <%= method.name %>
+                  <% if method.description.present? %>
+                    <p class="text-xs text-gray-500 mt-1"><%= method.description %></p>
+                  <% end %>
+                </label>
+              </div>
+            <% end %>
           </div>
         </div>
       </div>

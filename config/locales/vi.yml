@@ -8,10 +8,10 @@ vi:
   payments:
     status:
       pending: "Chờ thanh toán"
-      paid: "Đã thanh toán"
+      completed: "Đã thanh toán"
       refunded: "Đã hoàn tiền"
       failed: "Thất bại"
-    method:
+    payment_method:
       cash: "Tiền mặt"
       bank_transfer: "Chuyển khoản"
       credit_card: "Thẻ tín dụng"

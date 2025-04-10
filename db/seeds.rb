@@ -210,23 +210,23 @@ puts "Hoàn thành! Đã tạo #{Villa.count} villa với dữ liệu mẫu và 
 puts "Tạo tài khoản quản trị..."
 
 members = [
-  { 
-    email: 'admin@example.com', 
-    password: 'password123', 
-    name: 'Quản trị viên', 
-    role: 'admin' 
+  {
+    email: 'admin@example.com',
+    password: 'password123',
+    name: 'Quản trị viên',
+    role: 'admin'
   },
-  { 
-    email: 'manager@example.com', 
-    password: 'password123', 
-    name: 'Quản lý', 
-    role: 'manager' 
+  {
+    email: 'manager@example.com',
+    password: 'password123',
+    name: 'Quản lý',
+    role: 'manager'
   },
-  { 
-    email: 'staff@example.com', 
-    password: 'password123', 
-    name: 'Nhân viên', 
-    role: 'staff' 
+  {
+    email: 'staff@example.com',
+    password: 'password123',
+    name: 'Nhân viên',
+    role: 'staff'
   }
 ]
 
@@ -243,3 +243,40 @@ members.each do |member_data|
 end
 
 puts "Hoàn thành việc tạo dữ liệu!"
+
+# Thêm các phương thức thanh toán
+puts "Creating payment methods..."
+payment_methods = [
+  {
+    name: "Thẻ tín dụng / Thẻ ghi nợ",
+    description: "Thanh toán an toàn bằng thẻ tín dụng hoặc thẻ ghi nợ.",
+    icon: "/images/payment/credit-card.svg",
+    active: true
+  },
+  {
+    name: "Chuyển khoản ngân hàng",
+    description: "Chuyển khoản qua ngân hàng nội địa.",
+    icon: "/images/payment/bank-transfer.svg",
+    active: true
+  },
+  {
+    name: "Tiền mặt khi nhận phòng",
+    description: "Thanh toán bằng tiền mặt tại lễ tân khi nhận phòng.",
+    icon: "/images/payment/cash.svg",
+    active: true
+  },
+  {
+    name: "Solana (SOL)",
+    description: "Thanh toán bằng tiền điện tử Solana (SOL).",
+    icon: "https://cryptologos.cc/logos/solana-sol-logo.png",
+    active: true
+  }
+]
+
+payment_methods.each do |method|
+  PaymentMethod.find_or_create_by!(name: method[:name]) do |pm|
+    pm.description = method[:description]
+    pm.icon = method[:icon]
+    pm.active = method[:active]
+  end
+end

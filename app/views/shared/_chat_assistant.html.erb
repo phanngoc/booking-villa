@@ -1,0 +1,182 @@
+<!-- Chat button -->
+<div class="fixed bottom-6 right-6 z-50" id="chat-button-container">
+  <button id="chat-button" class="flex items-center justify-center p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all focus:outline-none">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+    </svg>
+  </button>
+</div>
+
+<!-- Chat window -->
+<div class="fixed bottom-6 right-6 z-50 w-[300px] h-[500px] bg-white rounded-lg shadow-xl flex flex-col overflow-hidden opacity-0 invisible transform translate-y-2 scale-95 transition-all duration-200" id="chat-window">
+  <!-- Header -->
+  <div class="bg-blue-600 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center">
+      <div class="bg-white p-1 rounded-full">
+        <img src="https://cdn-icons-png.flaticon.com/512/9420/9420302.png" alt="Assistant" class="w-6 h-6">
+      </div>
+      <h3 class="text-white font-medium ml-2">Trợ lý Villa</h3>
+    </div>
+    <div class="flex items-center space-x-2">
+      <button id="chat-settings" class="text-white opacity-70 hover:opacity-100">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+        </svg>
+      </button>
+      <button id="close-chat" class="text-white opacity-70 hover:opacity-100">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Chat messages -->
+  <div class="flex-1 p-4 overflow-y-auto" id="chat-messages">
+    <div class="flex items-start mb-4">
+      <div class="flex-shrink-0 bg-gray-100 rounded-full p-1">
+        <img src="https://cdn-icons-png.flaticon.com/512/9420/9420302.png" alt="Assistant" class="w-6 h-6">
+      </div>
+      <div class="ml-2 py-2 px-3 bg-gray-100 rounded-lg rounded-tl-none">
+        <p class="text-sm text-gray-800">Chào mừng đến với Villa Booking! Tôi có thể giúp gì cho bạn?</p>
+      </div>
+    </div>
+    
+    <div class="flex items-start mb-4">
+      <div class="ml-auto py-2 px-3 bg-blue-600 text-white rounded-lg rounded-tr-none">
+        <p class="text-sm">Tôi muốn đặt phòng.</p>
+      </div>
+    </div>
+    
+    <div class="flex items-start mb-4">
+      <div class="flex-shrink-0 bg-gray-100 rounded-full p-1">
+        <img src="https://cdn-icons-png.flaticon.com/512/9420/9420302.png" alt="Assistant" class="w-6 h-6">
+      </div>
+      <div class="ml-2 py-2 px-3 bg-gray-100 rounded-lg rounded-tl-none">
+        <p class="text-sm text-gray-800">Bạn có thể chọn villa từ trang chủ hoặc sử dụng bộ lọc để tìm villa phù hợp. Bạn cần đặt phòng cho ngày nào?</p>
+      </div>
+    </div>
+    
+    <!-- Quick replies -->
+    <div class="flex flex-wrap gap-2 justify-center mt-4">
+      <button class="text-sm py-1 px-3 rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors">
+        Hôm nay
+      </button>
+      <button class="text-sm py-1 px-3 rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors">
+        Tuần này
+      </button>
+      <button class="text-sm py-1 px-3 rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors">
+        Tháng sau
+      </button>
+    </div>
+  </div>
+  
+  <!-- Input area -->
+  <div class="p-3 border-t">
+    <div class="relative">
+      <input type="text" id="chat-input" placeholder="Nhập tin nhắn..." class="w-full rounded-full py-2 pl-4 pr-10 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white">
+      <button id="send-message" class="absolute right-1 top-1 p-1 text-blue-600 rounded-full hover:bg-blue-100 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const chatButton = document.getElementById('chat-button');
+    const closeChat = document.getElementById('close-chat');
+    const chatWindow = document.getElementById('chat-window');
+    const chatInput = document.getElementById('chat-input');
+    const sendMessage = document.getElementById('send-message');
+    
+    // Kiểm tra trạng thái chat từ localStorage
+    const chatState = localStorage.getItem('chat-state');
+    if (chatState === 'open') {
+      // Hiển thị chat nếu trạng thái là mở
+      chatWindow.classList.remove('opacity-0', 'invisible', 'translate-y-2', 'scale-95');
+      chatButton.classList.add('opacity-0', 'invisible');
+    }
+    
+    function toggleChat() {
+      if (chatWindow.classList.contains('opacity-0')) {
+        // Show chat window
+        chatWindow.classList.remove('opacity-0', 'invisible', 'translate-y-2', 'scale-95');
+        chatButton.classList.add('opacity-0', 'invisible');
+        localStorage.setItem('chat-state', 'open');
+      } else {
+        // Hide chat window
+        chatWindow.classList.add('opacity-0', 'invisible', 'translate-y-2', 'scale-95');
+        chatButton.classList.remove('opacity-0', 'invisible');
+        localStorage.setItem('chat-state', 'closed');
+      }
+    }
+    
+    chatButton.addEventListener('click', toggleChat);
+    closeChat.addEventListener('click', toggleChat);
+    
+    // Handle sending messages
+    function sendChatMessage() {
+      const message = chatInput.value.trim();
+      if (message) {
+        // Here you would normally send the message to your backend
+        // For this example, we'll just add it to the UI
+        const messagesContainer = document.getElementById('chat-messages');
+        
+        const messageHTML = `
+          <div class="flex items-start mb-4">
+            <div class="ml-auto py-2 px-3 bg-blue-600 text-white rounded-lg rounded-tr-none">
+              <p class="text-sm">${message}</p>
+            </div>
+          </div>
+        `;
+        
+        // Add user message
+        messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+        
+        // Clear input
+        chatInput.value = '';
+        
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        // In a real app, you would send the message to your backend,
+        // then display the response from the assistant
+        setTimeout(function() {
+          const assistantMessage = `
+            <div class="flex items-start mb-4">
+              <div class="flex-shrink-0 bg-gray-100 rounded-full p-1">
+                <img src="https://cdn-icons-png.flaticon.com/512/9420/9420302.png" alt="Assistant" class="w-6 h-6">
+              </div>
+              <div class="ml-2 py-2 px-3 bg-gray-100 rounded-lg rounded-tl-none">
+                <p class="text-sm text-gray-800">Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi sớm!</p>
+              </div>
+            </div>
+          `;
+          
+          messagesContainer.insertAdjacentHTML('beforeend', assistantMessage);
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 1000);
+      }
+    }
+    
+    sendMessage.addEventListener('click', sendChatMessage);
+    
+    chatInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendChatMessage();
+      }
+    });
+    
+    // Xử lý các nút trả lời nhanh
+    document.querySelectorAll('#chat-messages button').forEach(button => {
+      button.addEventListener('click', function() {
+        const quickReply = this.textContent.trim();
+        chatInput.value = quickReply;
+        sendChatMessage();
+      });
+    });
+  });
+</script> 

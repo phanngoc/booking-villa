@@ -2,6 +2,7 @@ class PaymentsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_booking
   before_action :set_payment
+  before_action :load_payment_methods, only: [ :choose_payment_method ]
 
   def show
   end
@@ -10,6 +11,8 @@ class PaymentsController < ApplicationController
   end
 
   def update
+    selected_payment_method = PaymentMethod.find_by(id: payment_params[:payment_method_id])
+
     if params[:confirm_cash].present?
       # Xử lý xác nhận thanh toán tiền mặt
       @payment.update(status: :completed)
@@ -23,7 +26,7 @@ class PaymentsController < ApplicationController
       )
       redirect_to booking_payment_path(@booking, @payment), notice: "Đã ghi nhận thông tin thanh toán của bạn. Chúng tôi sẽ xác nhận trong thời gian sớm nhất!"
     elsif @payment.update(payment_params)
-      if payment_params[:payment_method] == "sol_wallet"
+      if selected_payment_method&.name == "sol_wallet"
         redirect_to sol_payment_booking_payment_path(@booking, @payment)
       else
         redirect_to booking_payment_path(@booking, @payment), notice: "Phương thức thanh toán đã được cập nhật"
@@ -34,8 +37,11 @@ class PaymentsController < ApplicationController
   end
 
   def sol_payment
+    # Tìm phương thức thanh toán Solana
+    sol_payment_method = PaymentMethod.find_by(name: "sol_wallet")
+
     # Đảm bảo payment method được đặt thành sol_wallet
-    @payment.update(payment_method: :sol_wallet) unless @payment.sol_wallet?
+    @payment.update(payment_method_id: sol_payment_method.id) unless @payment.sol_wallet?
 
     # Tính toán số lượng SOL và lấy địa chỉ ví
     @sol_amount = calculate_sol_amount(@payment.amount)
@@ -49,8 +55,11 @@ class PaymentsController < ApplicationController
   end
 
   def bank_transfer
+    # Tìm phương thức thanh toán bank transfer
+    bank_payment_method = PaymentMethod.find_by(name: "bank_transfer")
+
     # Đảm bảo payment method được đặt thành bank_transfer
-    @payment.update(payment_method: :bank_transfer) unless @payment.bank_transfer?
+    @payment.update(payment_method_id: bank_payment_method.id) unless @payment.bank_transfer?
 
     # Thông tin ngân hàng để hiển thị
     @bank_info = {
@@ -88,8 +97,12 @@ class PaymentsController < ApplicationController
     @payment = @booking.payment
   end
 
+  def load_payment_methods
+    @payment_methods = PaymentMethod.active
+  end
+
   def payment_params
-    params.require(:payment).permit(:payment_method)
+    params.require(:payment).permit(:payment_method_id)
   end
 
   def calculate_sol_amount(vnd_amount)

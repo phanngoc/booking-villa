@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_04_06_063615) do
+ActiveRecord::Schema[7.2].define(version: 2025_04_09_151913) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -45,17 +45,28 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_06_063615) do
     t.index ["email"], name: "index_members_on_email", unique: true
   end
 
+  create_table "payment_methods", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.string "icon"
+    t.boolean "active"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_payment_methods_on_name", unique: true
+  end
+
   create_table "payments", force: :cascade do |t|
     t.bigint "booking_id", null: false
     t.decimal "amount"
-    t.string "payment_method"
     t.integer "status"
     t.string "transaction_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.decimal "sol_amount"
     t.string "payment_address"
+    t.bigint "payment_method_id"
     t.index ["booking_id"], name: "index_payments_on_booking_id"
+    t.index ["payment_method_id"], name: "index_payments_on_payment_method_id"
   end
 
   create_table "reviews", force: :cascade do |t|
@@ -122,6 +133,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_06_063615) do
   add_foreign_key "bookings", "users"
   add_foreign_key "bookings", "villas"
   add_foreign_key "payments", "bookings"
+  add_foreign_key "payments", "payment_methods"
   add_foreign_key "reviews", "bookings"
   add_foreign_key "reviews", "users"
   add_foreign_key "reviews", "villas"
