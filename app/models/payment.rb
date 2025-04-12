@@ -35,19 +35,19 @@ class Payment < ApplicationRecord
 
   # Các phương thức cũ
   def credit_card?
-    payment_method&.name == "credit_card"
+    payment_method_id == 1
   end
 
   def bank_transfer?
-    payment_method&.name == "bank_transfer"
+    payment_method_id == 2
   end
 
   def cash?
-    payment_method&.name == "cash"
+    payment_method_id == 3
   end
 
   def sol_wallet?
-    payment_method&.name == "sol_wallet"
+    payment_method_id == 4
   end
 
   private
