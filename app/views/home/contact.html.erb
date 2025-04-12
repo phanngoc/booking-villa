@@ -1,0 +1,75 @@
+<div class="container my-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h2 class="mb-0">Liên hệ với chúng tôi</h2>
+        </div>
+        <div class="card-body">
+          <p class="lead mb-4">Vui lòng điền vào form bên dưới để gửi tin nhắn cho chúng tôi. Chúng tôi sẽ phản hồi trong thời gian sớm nhất.</p>
+          
+          <form id="contact-form" data-user-id="<%= current_user&.id %>">
+            <div class="mb-3">
+              <label for="name" class="form-label">Họ và tên</label>
+              <input type="text" class="form-control" id="name" value="<%= current_user&.name %>" <%= current_user ? 'readonly' : '' %> required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" value="<%= current_user&.email %>" <%= current_user ? 'readonly' : '' %> required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="subject" class="form-label">Tiêu đề</label>
+              <input type="text" class="form-control" id="subject" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="message-content" class="form-label">Nội dung tin nhắn</label>
+              <textarea class="form-control" id="message-content" rows="5" required></textarea>
+            </div>
+            
+            <div class="d-grid">
+              <% if current_user %>
+                <button type="submit" class="btn btn-primary btn-lg">Gửi tin nhắn</button>
+              <% else %>
+                <div class="alert alert-warning">
+                  Bạn cần <a href="<%= new_user_session_path %>">đăng nhập</a> để gửi tin nhắn.
+                </div>
+              <% end %>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <div class="card mt-4 shadow">
+        <div class="card-header bg-light">
+          <h3 class="mb-0">Thông tin liên hệ khác</h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <h5><i class="bi bi-geo-alt-fill text-primary"></i> Địa chỉ</h5>
+              <p>123 Đường ABC, Quận XYZ<br>Thành phố Hồ Chí Minh, Việt Nam</p>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+              <h5><i class="bi bi-telephone-fill text-primary"></i> Điện thoại</h5>
+              <p>+84 123 456 789</p>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+              <h5><i class="bi bi-envelope-fill text-primary"></i> Email</h5>
+              <p>info@villabooking.com</p>
+            </div>
+            
+            <div class="col-md-6">
+              <h5><i class="bi bi-clock-fill text-primary"></i> Giờ làm việc</h5>
+              <p>Thứ Hai - Thứ Sáu: 8:00 - 17:00<br>Thứ Bảy: 8:00 - 12:00</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

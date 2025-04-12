@@ -4,9 +4,23 @@ Rails.application.routes.draw do
   get "villas/index"
   get "villas/show"
   namespace :admin do
+    resources :notifications do
+      collection do
+        get :count_unread
+        post :mark_all_as_read
+      end
+      member do
+        post :mark_as_read
+      end
+    end
     resources :users
     resources :filter_fields
     resources :bookings
+    resources :chats, only: [ :index, :show ] do
+      collection do
+        post :receive_message
+      end
+    end
 
     # Routes cho admin đăng nhập
     devise_scope :user do
@@ -43,10 +57,33 @@ Rails.application.routes.draw do
     end
   end
 
+  # Routes cho chat của người dùng
+  resources :chats, only: [ :index, :show ] do
+    collection do
+      post :create_message
+    end
+  end
+
+  # Routes cho admin chat
+  namespace :admin do
+    resources :chats, only: [ :index, :show ] do
+      member do
+        patch :close
+        patch :reopen
+      end
+      collection do
+        get :chat_console
+      end
+    end
+  end
+
   # Sidekiq Web UI
   authenticate :user, lambda { |u| u.admin? } do
     mount Sidekiq::Web => "/sidekiq"
   end
+
+  # Mount ActionCable cho WebSocket
+  mount ActionCable.server => "/cable"
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -62,4 +99,5 @@ Rails.application.routes.draw do
   root "villas#index"
 
   get "my-bookings", to: "bookings#my_bookings", as: :my_bookings
+  get "contact", to: "home#contact", as: :contact
 end

@@ -57,14 +57,3 @@
     </div>
   </div>
 </div>
-
-<%# Thêm Stimulus controller cho auto-submit %>
-<%= content_for :head do %>
-  <%= javascript_tag do %>
-    import { Application } from "@hotwired/stimulus"
-    import AutoSubmitController from "./auto_submit_controller"
-
-    const application = Application.start()
-    application.register("auto-submit", AutoSubmitController)
-  <% end %>
-<% end %>

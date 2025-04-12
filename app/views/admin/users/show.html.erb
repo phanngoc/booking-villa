@@ -73,8 +73,8 @@
                         <small><%= l booking.created_at, format: :short %></small>
                       </div>
                       <p class="mb-1">
-                        Ngày: <%= l booking.check_in_date, format: :short if booking.check_in_date %> 
-                        → <%= l booking.check_out_date, format: :short if booking.check_out_date %>
+                        Ngày: <%= l booking.check_in, format: :short if booking.check_in %> 
+                        → <%= l booking.check_out, format: :short if booking.check_out %>
                       </p>
                       <small class="text-muted">
                         Trạng thái: 

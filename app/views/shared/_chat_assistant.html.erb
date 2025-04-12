@@ -42,31 +42,16 @@
       </div>
     </div>
     
-    <div class="flex items-start mb-4">
-      <div class="ml-auto py-2 px-3 bg-blue-600 text-white rounded-lg rounded-tr-none">
-        <p class="text-sm">Tôi muốn đặt phòng.</p>
-      </div>
-    </div>
-    
-    <div class="flex items-start mb-4">
-      <div class="flex-shrink-0 bg-gray-100 rounded-full p-1">
-        <img src="https://cdn-icons-png.flaticon.com/512/9420/9420302.png" alt="Assistant" class="w-6 h-6">
-      </div>
-      <div class="ml-2 py-2 px-3 bg-gray-100 rounded-lg rounded-tl-none">
-        <p class="text-sm text-gray-800">Bạn có thể chọn villa từ trang chủ hoặc sử dụng bộ lọc để tìm villa phù hợp. Bạn cần đặt phòng cho ngày nào?</p>
-      </div>
-    </div>
-    
     <!-- Quick replies -->
     <div class="flex flex-wrap gap-2 justify-center mt-4">
-      <button class="text-sm py-1 px-3 rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors">
-        Hôm nay
+      <button class="text-sm py-1 px-3 rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors quick-reply">
+        Đặt phòng
       </button>
-      <button class="text-sm py-1 px-3 rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors">
-        Tuần này
+      <button class="text-sm py-1 px-3 rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors quick-reply">
+        Giá cả
       </button>
-      <button class="text-sm py-1 px-3 rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors">
-        Tháng sau
+      <button class="text-sm py-1 px-3 rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors quick-reply">
+        Tiện nghi
       </button>
     </div>
   </div>
@@ -84,16 +69,33 @@
   </div>
 </div>
 
-<script>
+<%= javascript_import_module_tag "channels" %>
+
+<script type="module">
   document.addEventListener('DOMContentLoaded', function() {
     const chatButton = document.getElementById('chat-button');
     const closeChat = document.getElementById('close-chat');
     const chatWindow = document.getElementById('chat-window');
+    const messagesContainer = document.getElementById('chat-messages');
     const chatInput = document.getElementById('chat-input');
     const sendMessage = document.getElementById('send-message');
     
-    // Kiểm tra trạng thái chat từ localStorage
-    const chatState = localStorage.getItem('chat-state');
+    // Khởi tạo dữ liệu cho chat
+    const chatSessionId = localStorage.getItem('chat-session-id') || createUUID();
+    localStorage.setItem('chat-session-id', chatSessionId);
+    
+    // Lưu thread_id nếu đã có, nếu không để trống (sẽ được tạo sau)
+    let chatThreadId = localStorage.getItem('chat-thread-id') || null;
+    
+    // Lấy trạng thái chat từ localStorage
+    const chatState = localStorage.getItem('chat-state') || 'closed';
+    
+    // Nếu đã đăng nhập thì lấy thông tin user, nếu không thì tạo thông tin tạm
+    const currentUser = {
+      id: '<%= current_user&.id || "guest" %>', 
+      name: '<%= current_user&.email || "Khách" %>'
+    };
+    
     if (chatState === 'open') {
       // Hiển thị chat nếu trạng thái là mở
       chatWindow.classList.remove('opacity-0', 'invisible', 'translate-y-2', 'scale-95');
@@ -117,51 +119,142 @@
     chatButton.addEventListener('click', toggleChat);
     closeChat.addEventListener('click', toggleChat);
     
-    // Handle sending messages
+    // Đầu tiên, lấy hoặc tạo ChatThread cho người dùng
+    // Nếu chưa có chat_thread_id, gọi API để lấy hoặc tạo mới
+    if (!chatThreadId) {
+      // Gọi API để tạo hoặc lấy chat thread hiện có
+      fetch('/chats.json')
+        .then(response => response.json())
+        .then(data => {
+          // Lưu thread_id vào localStorage
+          chatThreadId = data.chat_thread.id;
+          localStorage.setItem('chat-thread-id', chatThreadId);
+          
+          // Sau khi có thread_id, tạo kết nối WebSocket
+          createChatThreadChannel(chatThreadId);
+        })
+        .catch(error => {
+          console.error('Lỗi khi tạo chat thread:', error);
+        });
+    } else {
+      // Nếu đã có thread_id, tạo kết nối WebSocket ngay
+      createChatThreadChannel(chatThreadId);
+    }
+    
+    // Hàm tạo kết nối WebSocket với ChatThreadChannel
+    function createChatThreadChannel(threadId) {
+      return import("<%= asset_path('channels/consumer.js') %>").then(module => {
+        const consumer = module.default;
+        
+        return consumer.subscriptions.create({
+          channel: "ChatThreadChannel",
+          chat_thread_id: threadId
+        }, {
+          connected() {
+            console.log(`Đã kết nối với ChatThreadChannel cho thread ${threadId}`);
+          },
+          
+          disconnected() {
+            console.log(`Đã ngắt kết nối từ ChatThreadChannel cho thread ${threadId}`);
+          },
+          
+          received(data) {
+            console.log("Nhận dữ liệu từ channel:", data);
+            
+            if (data.action === "new_message") {
+              // Hiển thị tin nhắn mới
+              displayMessage(data.content, data.sender);
+            }
+          }
+        });
+      });
+    }
+    
+    // Hàm gửi tin nhắn qua socket
     function sendChatMessage() {
       const message = chatInput.value.trim();
-      if (message) {
-        // Here you would normally send the message to your backend
-        // For this example, we'll just add it to the UI
-        const messagesContainer = document.getElementById('chat-messages');
+      if (message && chatThreadId) {
+        // Hiển thị tin nhắn của người dùng
+        // displayMessage(message, 'user');
         
-        const messageHTML = `
-          <div class="flex items-start mb-4">
-            <div class="ml-auto py-2 px-3 bg-blue-600 text-white rounded-lg rounded-tr-none">
-              <p class="text-sm">${message}</p>
-            </div>
-          </div>
-        `;
-        
-        // Add user message
-        messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
-        
-        // Clear input
-        chatInput.value = '';
-        
-        // Scroll to bottom
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        
-        // In a real app, you would send the message to your backend,
-        // then display the response from the assistant
-        setTimeout(function() {
-          const assistantMessage = `
-            <div class="flex items-start mb-4">
-              <div class="flex-shrink-0 bg-gray-100 rounded-full p-1">
-                <img src="https://cdn-icons-png.flaticon.com/512/9420/9420302.png" alt="Assistant" class="w-6 h-6">
-              </div>
-              <div class="ml-2 py-2 px-3 bg-gray-100 rounded-lg rounded-tl-none">
-                <p class="text-sm text-gray-800">Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi sớm!</p>
-              </div>
-            </div>
-          `;
+        // Tạo biến để lưu trữ tham chiếu đến kênh chat thread
+        import("<%= asset_path('channels/consumer.js') %>").then(module => {
+          const consumer = module.default;
+          const chatChannel = consumer.subscriptions.create({
+            channel: "ChatThreadChannel",
+            chat_thread_id: chatThreadId
+          }, {});
           
-          messagesContainer.insertAdjacentHTML('beforeend', assistantMessage);
-          messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }, 1000);
+          // Gửi tin nhắn qua WebSocket
+          chatChannel.perform('send_message', {
+            content: message,
+            chat_thread_id: chatThreadId,
+            sender: currentUser.id === 'guest' ? 'guest' : 'user',
+            user_id: currentUser.id,
+            user_name: currentUser.name
+          });
+          
+          // Hủy đăng ký kênh sau khi gửi (tránh tạo nhiều kết nối)
+          setTimeout(() => {
+            chatChannel.unsubscribe();
+          }, 1000);
+        });
+        
+        // Xóa nội dung input
+        chatInput.value = '';
+      } else if (!chatThreadId) {
+        console.error("Chưa có chat thread ID");
+        // Hiển thị thông báo cho người dùng
+        displayMessage("Đang kết nối với hệ thống, vui lòng thử lại sau giây lát...", 'system');
       }
     }
     
+    // Hàm hiển thị tin nhắn
+    function displayMessage(content, senderType) {
+      let messageHTML = '';
+      
+      if (senderType === 'user' || senderType === 'guest') {
+        messageHTML = `
+          <div class="flex items-start mb-4">
+            <div class="ml-auto py-2 px-3 bg-blue-600 text-white rounded-lg rounded-tr-none">
+              <p class="text-sm">${content}</p>
+            </div>
+          </div>
+        `;
+      } else if (senderType === 'system') {
+        messageHTML = `
+          <div class="flex items-start mb-4 justify-center">
+            <div class="py-2 px-3 bg-yellow-100 text-yellow-800 rounded-lg text-center">
+              <p class="text-sm">${content}</p>
+            </div>
+          </div>
+        `;
+      } else {
+        messageHTML = `
+          <div class="flex items-start mb-4">
+            <div class="flex-shrink-0 bg-gray-100 rounded-full p-1">
+              <img src="https://cdn-icons-png.flaticon.com/512/9420/9420302.png" alt="Assistant" class="w-6 h-6">
+            </div>
+            <div class="ml-2 py-2 px-3 bg-gray-100 rounded-lg rounded-tl-none">
+              <p class="text-sm text-gray-800">${content}</p>
+            </div>
+          </div>
+        `;
+      }
+      
+      messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    // Hàm tạo UUID
+    function createUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+    
+    // Event listener cho nút gửi và nhấn Enter
     sendMessage.addEventListener('click', sendChatMessage);
     
     chatInput.addEventListener('keypress', function(e) {
@@ -171,7 +264,7 @@
     });
     
     // Xử lý các nút trả lời nhanh
-    document.querySelectorAll('#chat-messages button').forEach(button => {
+    document.querySelectorAll('.quick-reply').forEach(button => {
       button.addEventListener('click', function() {
         const quickReply = this.textContent.trim();
         chatInput.value = quickReply;

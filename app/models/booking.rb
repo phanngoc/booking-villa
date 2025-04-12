@@ -1,4 +1,13 @@
 class Booking < ApplicationRecord
+  # Ransack configuration
+  def self.ransackable_attributes(auth_object = nil)
+    [ "check_in", "check_out", "created_at", "id", "status", "total_price", "updated_at", "user_id", "villa_id" ]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    [ "user", "villa", "payment", "review" ]
+  end
+
   # Validations
   validates :check_in, :check_out, :total_price, presence: true
   validates :check_out, comparison: { greater_than: :check_in }

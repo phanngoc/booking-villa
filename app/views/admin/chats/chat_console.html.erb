@@ -1,0 +1,389 @@
+<!-- Admin Chat Console -->
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6">Bảng điều khiển chat</h1>
+  
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Danh sách phiên chat -->
+    <div class="bg-white rounded-lg shadow-md p-4 md:col-span-1">
+      <h2 class="text-lg font-semibold mb-4">Người dùng đang hoạt động</h2>
+      <div id="active-sessions" class="space-y-2 max-h-[500px] overflow-y-auto">
+        <!-- Session items sẽ được thêm ở đây qua JavaScript -->
+      </div>
+    </div>
+    
+    <!-- Khu vực chat -->
+    <div class="bg-white rounded-lg shadow-md md:col-span-2 flex flex-col h-[600px]">
+      <!-- Header của chat -->
+      <div class="border-b p-4 flex items-center">
+        <div id="current-user-info" class="flex-1">
+          <span class="text-gray-500">Chọn người dùng để bắt đầu chat</span>
+        </div>
+      </div>
+      
+      <!-- Tin nhắn -->
+      <div id="chat-messages" class="flex-1 p-4 overflow-y-auto">
+        <!-- Tin nhắn sẽ được thêm ở đây qua JavaScript -->
+      </div>
+      
+      <!-- Input chat -->
+      <div class="border-t p-4">
+        <div class="flex items-center">
+          <input id="admin-message-input" type="text" placeholder="Nhập tin nhắn..." class="flex-1 rounded-full border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+          <button id="admin-send-button" class="ml-2 px-4 py-2 bg-blue-600 text-white rounded-full disabled:bg-gray-300" disabled>
+            Gửi
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<meta name="current-admin-id" content="<%= current_admin&.id || 'system' %>">
+<%= javascript_import_module_tag "channels" %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const activeSessions = document.getElementById('active-sessions');
+  const chatMessages = document.getElementById('chat-messages');
+  const currentUserInfo = document.getElementById('current-user-info');
+  const adminMessageInput = document.getElementById('admin-message-input');
+  const adminSendButton = document.getElementById('admin-send-button');
+  
+  let currentThreadId = null;
+  let threads = {};
+  
+  // Tải dữ liệu chat threads hiện có khi trang được tải
+  loadExistingThreads();
+  
+  // Kết nối với AdminChatChannel (được import từ channels/admin_chat_channel.js)
+  // Lưu ý rằng biến 'adminChat' được export từ admin_chat_channel.js
+  import("<%= asset_path('channels/admin_chat_channel.js') %>").then(module => {
+    const adminChat = module.default;
+    
+    adminChat.received = function(data) {
+      console.log("Admin nhận dữ liệu:", data);
+      
+      if (data.action === "new_message") {
+        handleNewMessage(data);
+      } else if (data.action === "thread_closed") {
+        handleThreadClosed(data.chat_thread_id);
+      } else if (data.action === "thread_reopened") {
+        handleThreadReopened(data.chat_thread_id);
+      } else if (data.action === "message_sent") {
+        // Thông báo gửi tin nhắn thành công
+        console.log("Tin nhắn đã được gửi thành công, ID:", data.message_id);
+      }
+    };
+    
+    // Xử lý gửi tin nhắn
+    adminSendButton.addEventListener('click', function() {
+      sendAdminMessage(adminChat);
+    });
+    
+    adminMessageInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendAdminMessage(adminChat);
+      }
+    });
+  });
+  
+  // Tải dữ liệu chat threads hiện có
+  function loadExistingThreads() {
+    fetch('/admin/chats.json')
+      .then(response => response.json())
+      .then(data => {
+        // Thêm các threads vào danh sách
+        data.active_threads.forEach(thread => {
+          addChatThread(thread);
+        });
+        
+        // Thêm các threads đã đóng
+        data.closed_threads.forEach(thread => {
+          addChatThread(thread, true);
+        });
+      })
+      .catch(error => console.error('Error loading chat threads:', error));
+  }
+  
+  // Thêm thread vào danh sách
+  function addChatThread(thread, isClosed = false) {
+    const threadId = thread.id;
+    const userId = thread.user_id;
+    const userName = thread.user ? thread.user.email : 'Khách';
+    
+    // Thêm vào danh sách thread nếu chưa tồn tại
+    if (!threads[threadId]) {
+      threads[threadId] = {
+        id: threadId,
+        userId: userId,
+        userName: userName,
+        messages: [],
+        status: isClosed ? "closed" : "active",
+        unread: thread.is_unread ? 1 : 0,
+        lastActivity: new Date(thread.last_activity_at)
+      };
+      
+      // Tạo phần tử HTML cho thread chat
+      const threadElement = document.createElement('div');
+      threadElement.id = `thread-item-${threadId}`;
+      threadElement.className = `p-3 rounded cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-between ${isClosed ? 'opacity-60' : ''} ${thread.is_unread ? 'bg-blue-50' : ''}`;
+      
+      const formattedDate = new Date(thread.last_activity_at).toLocaleString('vi-VN', {
+        month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      
+      threadElement.innerHTML = `
+        <div>
+          <div class="font-medium">${userName}</div>
+          <div class="text-sm text-gray-500 truncate">${formattedDate}</div>
+        </div>
+        <div class="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center unread-badge" ${thread.is_unread ? '' : 'style="display: none;"'}>!</div>
+      `;
+      
+      // Thêm sự kiện click để chọn thread chat
+      threadElement.addEventListener('click', function() {
+        loadChatThread(threadId);
+      });
+      
+      // Thêm vào DOM
+      activeSessions.appendChild(threadElement);
+    }
+  }
+  
+  // Tải nội dung của một thread chat
+  function loadChatThread(threadId) {
+    fetch(`/admin/chats/${threadId}.json`)
+      .then(response => response.json())
+      .then(data => {
+        // Lưu tin nhắn vào thread
+        threads[threadId].messages = data.messages;
+        
+        // Đánh dấu là đã đọc
+        threads[threadId].unread = 0;
+        const unreadBadge = document.querySelector(`#thread-item-${threadId} .unread-badge`);
+        if (unreadBadge) unreadBadge.style.display = 'none';
+        
+        // Chọn thread này
+        selectThread(threadId);
+      })
+      .catch(error => console.error('Error loading chat thread:', error));
+  }
+  
+  // Xử lý khi có tin nhắn mới
+  function handleNewMessage(data) {
+    const threadId = data.chat_thread_id;
+    const message = {
+      id: data.message_id,
+      content: data.content,
+      sender: data.sender,
+      created_at: new Date(data.timestamp * 1000)
+    };
+    
+    // Tạo thread mới nếu chưa tồn tại
+    if (!threads[threadId]) {
+      // Tải thông tin thread từ server
+      fetch(`/admin/chats/${threadId}.json`)
+        .then(response => response.json())
+        .then(data => {
+          addChatThread(data.thread);
+          // Thêm tin nhắn vào thread sau khi đã tạo
+          handleNewMessage(message);
+        })
+        .catch(error => console.error('Error loading new chat thread:', error));
+      return;
+    }
+    
+    // Thêm tin nhắn vào thread
+    if (threads[threadId]) {
+      threads[threadId].messages.push(message);
+      threads[threadId].lastActivity = new Date();
+      
+      // Nếu đang xem thread này, hiển thị tin nhắn
+      if (currentThreadId === threadId) {
+        displayMessage(message.content, message.sender);
+      }
+      // Nếu không, tăng số tin nhắn chưa đọc
+      else {
+        threads[threadId].unread++;
+        const unreadBadge = document.querySelector(`#thread-item-${threadId} .unread-badge`);
+        if (unreadBadge) {
+          unreadBadge.style.display = 'flex';
+        }
+        
+        // Highlight thread chat
+        const threadElement = document.getElementById(`thread-item-${threadId}`);
+        if (threadElement) {
+          threadElement.classList.add('bg-blue-50');
+        }
+      }
+    }
+  }
+  
+  // Xử lý khi thread chat bị đóng
+  function handleThreadClosed(threadId) {
+    if (threads[threadId]) {
+      threads[threadId].status = "closed";
+      
+      // Cập nhật giao diện thread chat
+      const threadElement = document.getElementById(`thread-item-${threadId}`);
+      if (threadElement) {
+        threadElement.classList.add('opacity-60');
+      }
+    }
+  }
+  
+  // Xử lý khi thread chat được mở lại
+  function handleThreadReopened(threadId) {
+    if (threads[threadId]) {
+      threads[threadId].status = "active";
+      
+      // Cập nhật giao diện thread chat
+      const threadElement = document.getElementById(`thread-item-${threadId}`);
+      if (threadElement) {
+        threadElement.classList.remove('opacity-60');
+      }
+    }
+  }
+  
+  // Chọn thread chat
+  function selectThread(threadId) {
+    currentThreadId = threadId;
+    const thread = threads[threadId];
+    
+    // Cập nhật giao diện
+    document.querySelectorAll('#active-sessions > div').forEach(el => {
+      el.classList.remove('bg-blue-100');
+    });
+    const threadElement = document.getElementById(`thread-item-${threadId}`);
+    if (threadElement) {
+      threadElement.classList.add('bg-blue-100');
+      threadElement.classList.remove('bg-blue-50');
+    }
+    
+    // Đặt số tin nhắn chưa đọc về 0
+    thread.unread = 0;
+    const unreadBadge = document.querySelector(`#thread-item-${threadId} .unread-badge`);
+    if (unreadBadge) {
+      unreadBadge.style.display = 'none';
+    }
+    
+    // Cập nhật header
+    const formattedDate = thread.lastActivity.toLocaleString('vi-VN', {
+      year: 'numeric', month: 'numeric', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+    
+    currentUserInfo.innerHTML = `
+      <div class="flex justify-between w-full">
+        <div>
+          <div class="font-medium">${thread.userName}</div>
+          <div class="text-sm text-gray-500">ID: ${thread.id}</div>
+          <div class="text-xs text-gray-400">Hoạt động lần cuối: ${formattedDate}</div>
+        </div>
+        <div>
+          ${thread.status === "active" ? 
+            `<a href="/admin/chats/${threadId}/close" data-method="patch" class="text-red-500 text-sm">Đóng chat</a>` : 
+            `<a href="/admin/chats/${threadId}/reopen" data-method="patch" class="text-green-500 text-sm">Mở lại chat</a>`
+          }
+        </div>
+      </div>
+    `;
+    
+    // Hiển thị tin nhắn của thread chat
+    chatMessages.innerHTML = '';
+    thread.messages.forEach(msg => {
+      displayMessage(msg.content, msg.sender);
+    });
+    
+    // Bật input chat
+    adminMessageInput.disabled = thread.status === "closed";
+    adminSendButton.disabled = thread.status === "closed";
+    
+    // Đánh dấu tin nhắn là đã đọc trên server
+    if (thread.messages.some(msg => msg.sender === "user" && !msg.is_read)) {
+      fetch(`/admin/chats/${threadId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ mark_as_read: true })
+      }).then(response => {
+        if (response.ok) {
+          console.log('Tin nhắn đã được đánh dấu là đã đọc');
+        }
+      });
+    }
+  }
+  
+  // Hiển thị tin nhắn trong khu vực chat
+  function displayMessage(content, sender) {
+    let messageHTML = '';
+    
+    if (sender === 'user') {
+      messageHTML = `
+        <div class="flex items-start mb-4">
+          <div class="py-2 px-3 bg-gray-100 rounded-lg rounded-tl-none">
+            <p class="text-sm text-gray-800">${content}</p>
+          </div>
+        </div>
+      `;
+    } else {
+      messageHTML = `
+        <div class="flex items-start mb-4 justify-end">
+          <div class="py-2 px-3 bg-blue-600 text-white rounded-lg rounded-tr-none">
+            <p class="text-sm">${content}</p>
+          </div>
+        </div>
+      `;
+    }
+    
+    chatMessages.insertAdjacentHTML('beforeend', messageHTML);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+  
+  // Gửi tin nhắn từ admin
+  function sendAdminMessage(adminChat) {
+    const message = adminMessageInput.value.trim();
+    if (message && currentThreadId) {
+      const thread = threads[currentThreadId];
+      
+      // Kiểm tra xem thread có đang mở không
+      if (thread.status === "closed") {
+        alert("Không thể gửi tin nhắn trong cuộc trò chuyện đã đóng. Vui lòng mở lại cuộc trò chuyện.");
+        return;
+      }
+      
+      // Gửi tin nhắn qua WebSocket
+      adminChat.adminReply(currentThreadId, message);
+      
+      // Hiển thị tin nhắn trên giao diện (sẽ được cập nhật khi nhận phản hồi từ server)
+      displayMessage(message, 'admin');
+      
+      // Thêm vào danh sách tin nhắn của thread chat
+      threads[currentThreadId].messages.push({
+        id: 'temp-' + Date.now(),
+        content: message,
+        sender: 'admin',
+        created_at: new Date()
+      });
+      
+      // Cập nhật thời gian hoạt động cuối cùng
+      threads[currentThreadId].lastActivity = new Date();
+      
+      // Xóa input
+      adminMessageInput.value = '';
+      adminMessageInput.focus();
+    }
+  }
+  
+  // Cập nhật trạng thái đã đọc khi admin đang xem thread
+  function markThreadAsRead(adminChat, threadId) {
+    if (adminChat && threadId) {
+      adminChat.perform('mark_thread_as_read', {
+        chat_thread_id: threadId
+      });
+    }
+  }
+});
+</script> 

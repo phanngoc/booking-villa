@@ -64,6 +64,8 @@ gem "sidekiq", "~> 7.0"
 gem "tailwindcss-rails", "~> 4.2"
 gem "dotenv-rails"
 gem "kaminari", "~> 1.2" # Phân trang
+gem "bootstrap5-kaminari-views" # Bootstrap 5 theme for Kaminari
+gem "ransack", "~> 4.1" # Search functionality
 
 # Gem cho thanh toán tiền điện tử
 gem "rqrcode", "~> 2.1" # Tạo QR code

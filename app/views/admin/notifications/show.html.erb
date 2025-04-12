@@ -1,0 +1,50 @@
+<div class="container">
+  <div class="row mb-4">
+    <div class="col">
+      <h2>Chi tiết thông báo</h2>
+    </div>
+    <div class="col-auto">
+      <%= link_to "Quay lại", admin_notifications_path, class: "btn btn-secondary" %>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">Thông báo <%= @notification.created_at.strftime("%d/%m/%Y %H:%M") %></h5>
+      <% if @notification.is_read %>
+        <span class="badge bg-success">Đã đọc</span>
+      <% else %>
+        <span class="badge bg-warning">Chưa đọc</span>
+      <% end %>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <h6 class="fw-bold">Danh mục:</h6>
+        <p><%= @notification.category %></p>
+      </div>
+      <div>
+        <h6 class="fw-bold">Nội dung:</h6>
+        <p><%= @notification.content %></p>
+      </div>
+      
+      <% if @notification.category == 'user_message' %>
+      <div class="mt-4">
+        <h6 class="fw-bold">Hành động:</h6>
+        <%= link_to "Trả lời tin nhắn này", admin_chats_path, class: "btn btn-primary" %>
+      </div>
+      <% end %>
+    </div>
+    <div class="card-footer">
+      <div class="d-flex justify-content-between">
+        <div>
+          <small class="text-muted">Tạo lúc: <%= @notification.created_at.strftime("%d/%m/%Y %H:%M") %></small>
+        </div>
+        <div>
+          <% unless @notification.is_read %>
+            <%= button_to "Đánh dấu đã đọc", mark_as_read_admin_notification_path(@notification), method: :post, class: "btn btn-sm btn-success" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

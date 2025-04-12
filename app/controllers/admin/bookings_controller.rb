@@ -1,6 +1,6 @@
 class Admin::BookingsController < ApplicationController
   layout "admin"
-  before_action :authenticate_admin!
+  before_action :authenticate_admin
   before_action :set_booking, only: [ :show, :edit, :update, :destroy ]
 
   def index
@@ -39,11 +39,5 @@ class Admin::BookingsController < ApplicationController
 
   def booking_params
     params.require(:booking).permit(:status, :check_in, :check_out, :total_price)
-  end
-
-  def authenticate_admin!
-    unless current_user&.admin?
-      redirect_to root_path, alert: "Bạn không có quyền truy cập trang này."
-    end
   end
 end

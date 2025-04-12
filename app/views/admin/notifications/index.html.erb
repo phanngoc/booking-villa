@@ -1,0 +1,64 @@
+<div class="container">
+  <div class="row mb-4">
+    <div class="col">
+      <h2>Quản lý thông báo</h2>
+    </div>
+    <div class="col-auto">
+      <%= button_to "Đánh dấu tất cả là đã đọc", mark_all_as_read_admin_notifications_path, method: :post, class: "btn btn-primary", data: { confirm: "Bạn có chắc chắn muốn đánh dấu tất cả thông báo là đã đọc?" } %>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-light">
+      <h5 class="card-title mb-0">Danh sách thông báo</h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped mb-0">
+          <thead>
+            <tr>
+              <th>Nội dung</th>
+              <th>Danh mục</th>
+              <th>Ngày tạo</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if @notifications.present? %>
+              <% @notifications.each do |notification| %>
+                <tr class="<%= notification.is_read ? '' : 'table-info' %>">
+                  <td><%= notification.content %></td>
+                  <td><%= notification.category %></td>
+                  <td><%= notification.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+                  <td>
+                    <% if notification.is_read %>
+                      <span class="badge bg-success">Đã đọc</span>
+                    <% else %>
+                      <span class="badge bg-warning">Chưa đọc</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <%= link_to "Xem", admin_notification_path(notification), class: "btn btn-sm btn-info" %>
+                    <% unless notification.is_read %>
+                      <%= button_to "Đánh dấu đã đọc", mark_as_read_admin_notification_path(notification), method: :post, class: "btn btn-sm btn-success d-inline-block" %>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr>
+                <td colspan="5" class="text-center py-4">Không có thông báo nào</td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-center mt-4">
+    <%# Phân trang %>
+    <%= paginate @notifications if @notifications.present? %>
+  </div>
+</div>

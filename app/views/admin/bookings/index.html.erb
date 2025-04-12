@@ -19,8 +19,8 @@
                           { include_blank: "Tất cả" }, class: "form-select" %>
           </div>
           <div class="col-md-3 mb-3">
-            <%= f.label :payment_payment_method_eq, "Phương thức thanh toán" %>
-            <%= f.select :payment_payment_method_eq, Payment.payment_methods.map { |k, v| [k.humanize, v] }, 
+            <%= f.label :payment_payment_method_id_eq, "Phương thức thanh toán" %>
+            <%= f.select :payment_payment_method_id_eq, PaymentMethod.for_select, 
                           { include_blank: "Tất cả" }, class: "form-select" %>
           </div>
           <div class="col-md-3 mb-3">
@@ -120,8 +120,8 @@
                     <% end %>
                   </td>
                   <td>
-                    <% if booking.payment.present? %>
-                      <%= t("payments.payment_method.#{booking.payment.payment_method}") %>
+                    <% if booking.payment&.payment_method.present? %>
+                      <%= booking.payment.payment_method.display_name %>
                     <% else %>
                       <span class="text-muted">-</span>
                     <% end %>
@@ -155,7 +155,7 @@
     </div>
     <div class="card-footer">
       <div class="d-flex justify-content-center">
-        <%= paginate @bookings, theme: 'bootstrap-5' %>
+        <%= paginate @bookings, theme: 'bootstrap4' %>
       </div>
     </div>
   </div>

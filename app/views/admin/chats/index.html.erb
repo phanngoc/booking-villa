@@ -1,0 +1,280 @@
+<h2 class="mb-4">Quản lý cuộc trò chuyện</h2>
+
+<div class="row">
+  <!-- Sidebar: Danh sách chat thread -->
+  <div class="col-md-4 col-lg-3 mb-4">
+    <div class="card">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Cuộc trò chuyện</h5>
+        <a href="<%= chat_console_admin_chats_path %>" class="btn btn-sm btn-light">
+          <i class="bi bi-lightning-charge"></i> Realtime
+        </a>
+      </div>
+      
+      <div class="card-body p-0">
+        <!-- Tab navigation -->
+        <ul class="nav nav-tabs nav-fill" id="chatTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active-threads" type="button" role="tab">
+              Đang mở (<%= @active_threads.count %>)
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="closed-tab" data-bs-toggle="tab" data-bs-target="#closed-threads" type="button" role="tab">
+              Đã đóng (<%= @closed_threads.count %>)
+            </button>
+          </li>
+        </ul>
+        
+        <!-- Tab contents -->
+        <div class="tab-content" id="chatTabsContent">
+          <!-- Active threads -->
+          <div class="tab-pane fade show active" id="active-threads" role="tabpanel">
+            <div class="list-group list-group-flush thread-list">
+              <% if @active_threads.any? %>
+                <% @active_threads.each do |thread| %>
+                  <a href="<%= admin_chat_path(thread) %>" class="list-group-item list-group-item-action <%= 'active' if params[:id].to_i == thread.id %> <%= 'fw-bold' if thread.is_unread? %>" 
+                     data-thread-id="<%= thread.id %>">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <div class="d-flex align-items-center">
+                          <i class="bi bi-person-circle me-2"></i>
+                          <span><%= thread.user.email rescue "User ##{thread.user_id}" %></span>
+                          <% if thread.is_unread? %>
+                            <span class="badge bg-danger ms-2">Mới</span>
+                          <% end %>
+                        </div>
+                        <small class="text-muted d-block mt-1 text-truncate" style="max-width: 180px;">
+                          <% if thread.messages.any? %>
+                            <%= thread.messages.last.content.truncate(30) %>
+                          <% else %>
+                            <em>Chưa có tin nhắn</em>
+                          <% end %>
+                        </small>
+                      </div>
+                      <div class="text-end">
+                        <small class="text-muted">
+                          <%= time_ago_in_words(thread.last_activity_at || thread.created_at) %>
+                        </small>
+                        <span class="badge bg-primary rounded-pill d-block mt-1">
+                          <%= thread.messages.count %>
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                <% end %>
+              <% else %>
+                <div class="p-4 text-center text-muted">
+                  <i class="bi bi-chat-square-text" style="font-size: 2rem;"></i>
+                  <p class="mt-2">Không có cuộc trò chuyện đang mở</p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Closed threads -->
+          <div class="tab-pane fade" id="closed-threads" role="tabpanel">
+            <div class="list-group list-group-flush thread-list">
+              <% if @closed_threads.any? %>
+                <% @closed_threads.each do |thread| %>
+                  <a href="<%= admin_chat_path(thread) %>" class="list-group-item list-group-item-action <%= 'active' if params[:id].to_i == thread.id %>" 
+                     data-thread-id="<%= thread.id %>">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <div class="d-flex align-items-center">
+                          <i class="bi bi-person-circle me-2"></i>
+                          <span><%= thread.user.email rescue "User ##{thread.user_id}" %></span>
+                        </div>
+                        <small class="text-muted d-block mt-1 text-truncate" style="max-width: 180px;">
+                          <% if thread.messages.any? %>
+                            <%= thread.messages.last.content.truncate(30) %>
+                          <% else %>
+                            <em>Chưa có tin nhắn</em>
+                          <% end %>
+                        </small>
+                      </div>
+                      <div class="text-end">
+                        <small class="text-muted">
+                          <%= time_ago_in_words(thread.updated_at) %>
+                        </small>
+                        <span class="badge bg-secondary rounded-pill d-block mt-1">
+                          <%= thread.messages.count %>
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                <% end %>
+              <% else %>
+                <div class="p-4 text-center text-muted">
+                  <i class="bi bi-archive" style="font-size: 2rem;"></i>
+                  <p class="mt-2">Không có cuộc trò chuyện đã đóng</p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main content: Chi tiết tin nhắn -->
+  <div class="col-md-8 col-lg-9">
+    <div class="card" id="message-container">
+      <% if params[:id].present? && params[:id] != 'chat_console' %>
+        <!-- The message content will be loaded via AJAX -->
+        <div class="text-center p-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="mt-3">Đang tải tin nhắn...</p>
+        </div>
+      <% else %>
+        <div class="card-body text-center p-5">
+          <i class="bi bi-chat-dots" style="font-size: 4rem; color: #e9ecef;"></i>
+          <h4 class="mt-3">Chọn một cuộc trò chuyện từ danh sách bên trái</h4>
+          <p class="text-muted">Hoặc tạo một cuộc trò chuyện mới</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+  .thread-list {
+    max-height: 550px;
+    overflow-y: auto;
+  }
+  #message-container {
+    min-height: 600px;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Load thread messages if there's an active thread
+    const urlParams = new URLSearchParams(window.location.search);
+    const threadId = urlParams.get('id');
+    
+    if (threadId && threadId !== 'chat_console') {
+      loadThreadMessages(threadId);
+    }
+    
+    // Handle thread selection
+    const threadLinks = document.querySelectorAll('[data-thread-id]');
+    threadLinks.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Update active class
+        threadLinks.forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Load thread messages
+        const threadId = this.getAttribute('data-thread-id');
+        loadThreadMessages(threadId);
+        
+        // Update URL without reloading page
+        window.history.pushState({}, '', `/admin/chats/${threadId}`);
+      });
+    });
+    
+    function loadThreadMessages(threadId) {
+      const messageContainer = document.getElementById('message-container');
+      
+      // Show loading state
+      messageContainer.innerHTML = `
+        <div class="text-center p-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+          <p class="mt-3">Đang tải tin nhắn...</p>
+        </div>
+      `;
+      
+      // Fetch thread messages
+      fetch(`/admin/chats/${threadId}`)
+        .then(response => response.text())
+        .then(html => {
+          // Extract only the message content part from the response
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const contentElement = doc.querySelector('.card') || doc.body;
+          
+          messageContainer.innerHTML = contentElement.innerHTML;
+          
+          // Initialize form submission event for the newly loaded form
+          const replyForm = messageContainer.querySelector('#admin-reply-form');
+          if (replyForm) {
+            initializeReplyForm(replyForm);
+          }
+          
+          // Scroll to bottom of message history
+          const chatHistory = messageContainer.querySelector('#chat-history');
+          if (chatHistory) {
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+          }
+        })
+        .catch(error => {
+          console.error('Error loading messages:', error);
+          messageContainer.innerHTML = `
+            <div class="card-body text-center p-5">
+              <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #dc3545;"></i>
+              <h4 class="mt-3">Đã xảy ra lỗi</h4>
+              <p class="text-muted">Không thể tải tin nhắn. Vui lòng thử lại sau.</p>
+              <button class="btn btn-primary mt-3" onclick="loadThreadMessages(${threadId})">Thử lại</button>
+            </div>
+          `;
+        });
+    }
+    
+    function initializeReplyForm(form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const content = this.querySelector('input[name="content"]').value.trim();
+        if (!content) return;
+        
+        const threadId = this.querySelector('input[name="chat_thread_id"]').value;
+        
+        // Send message via AJAX
+        fetch(this.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({
+            chat_thread_id: threadId,
+            content: content,
+            sender: 'admin'
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Add message to UI
+          const chatHistory = document.getElementById('chat-history');
+          const messageHTML = `
+            <div class="d-flex justify-content-end mb-3">
+              <div class="bg-primary text-white rounded p-3" style="max-width: 75%;">
+                <p class="mb-1">${content}</p>
+                <small class="d-block text-end opacity-75">
+                  Admin - ${new Date().toLocaleString()}
+                </small>
+              </div>
+            </div>
+          `;
+          
+          chatHistory.insertAdjacentHTML('beforeend', messageHTML);
+          chatHistory.scrollTop = chatHistory.scrollHeight;
+          
+          // Clear input
+          this.querySelector('input[name="content"]').value = '';
+        })
+        .catch(error => {
+          console.error('Error sending message:', error);
+          alert('Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại.');
+        });
+      });
+    }
+  });
+</script>

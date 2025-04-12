@@ -1,0 +1,168 @@
+<!-- Giao diện chat cho người dùng -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden max-w-4xl mx-auto my-8">
+  <div class="border-b p-4 bg-blue-50">
+    <h1 class="text-xl font-semibold">Hỗ trợ trực tuyến</h1>
+    <p class="text-sm text-gray-500">Hãy đặt câu hỏi của bạn, chúng tôi sẽ phản hồi ngay!</p>
+  </div>
+  
+  <!-- Khu vực hiển thị tin nhắn -->
+  <div id="chat-messages" class="p-4 h-96 overflow-y-auto space-y-4">
+    <% if @messages.any? %>
+      <% @messages.each do |message| %>
+        <% if message.by_user? %>
+          <!-- Tin nhắn từ người dùng -->
+          <div class="flex justify-end">
+            <div class="bg-blue-100 p-3 rounded-lg max-w-xs">
+              <p class="text-sm"><%= message.content %></p>
+              <p class="text-right text-xs text-gray-500 mt-1"><%= message.created_at.strftime("%H:%M") %></p>
+            </div>
+          </div>
+        <% else %>
+          <!-- Tin nhắn từ admin -->
+          <div class="flex justify-start">
+            <div class="bg-gray-100 p-3 rounded-lg max-w-xs">
+              <p class="text-sm"><%= message.content %></p>
+              <p class="text-right text-xs text-gray-500 mt-1"><%= message.created_at.strftime("%H:%M") %></p>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    <% else %>
+      <div class="flex justify-center items-center h-full">
+        <p class="text-gray-500">Hãy bắt đầu cuộc trò chuyện...</p>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Form gửi tin nhắn -->
+  <div class="border-t p-4">
+    <%= form_with(url: create_message_chats_path, method: :post, id: "chat-form", class: "flex items-center", data: { controller: "chat" }) do |f| %>
+      <%= f.hidden_field :chat_thread_id, value: @chat_thread.id %>
+      <div class="flex-grow">
+        <%= f.text_field :content, placeholder: "Nhập tin nhắn...", class: "w-full border rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500", required: true, autocomplete: "off" %>
+      </div>
+      <%= f.submit "Gửi", class: "ml-2 bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    <% end %>
+  </div>
+</div>
+
+<%= javascript_import_module_tag "channels" %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const chatForm = document.getElementById('chat-form');
+  const chatMessages = document.getElementById('chat-messages');
+  const messageInput = document.querySelector('input[name="content"]');
+  const threadId = document.querySelector('input[name="chat_thread_id"]').value;
+  
+  // Kết nối với ChatThreadChannel
+  const chatChannel = App.cable.subscriptions.create(
+    {
+      channel: "ChatThreadChannel",
+      chat_thread_id: threadId
+    },
+    {
+      connected() {
+        console.log("Kết nối với ChatThreadChannel thành công");
+        
+        // Đánh dấu tin nhắn đã đọc khi người dùng kết nối
+        this.perform('mark_as_read', { chat_thread_id: threadId });
+      },
+      
+      disconnected() {
+        console.log("Ngắt kết nối với ChatThreadChannel");
+      },
+      
+      received(data) {
+        console.log("Nhận dữ liệu:", data);
+        
+        if (data.action === "new_message") {
+          addMessage(data.content, data.sender);
+        } else if (data.action === "thread_closed") {
+          showThreadClosedMessage();
+        } else if (data.action === "thread_reopened") {
+          hideThreadClosedMessage();
+        }
+      }
+    }
+  );
+  
+  // Xử lý khi gửi form
+  chatForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const content = messageInput.value.trim();
+    if (!content) return;
+    
+    // Gửi tin nhắn qua ActionCable
+    chatChannel.perform('send_message', {
+      chat_thread_id: threadId,
+      content: content,
+      sender: 'user'
+    });
+    
+    // Hiển thị tin nhắn trong giao diện
+    addMessage(content, 'user');
+    
+    // Xóa nội dung input
+    messageInput.value = '';
+  });
+  
+  // Thêm tin nhắn vào giao diện
+  function addMessage(content, sender) {
+    const time = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    
+    const messageHTML = sender === 'user'
+      ? `
+        <div class="flex justify-end">
+          <div class="bg-blue-100 p-3 rounded-lg max-w-xs">
+            <p class="text-sm">${content}</p>
+            <p class="text-right text-xs text-gray-500 mt-1">${time}</p>
+          </div>
+        </div>
+      `
+      : `
+        <div class="flex justify-start">
+          <div class="bg-gray-100 p-3 rounded-lg max-w-xs">
+            <p class="text-sm">${content}</p>
+            <p class="text-right text-xs text-gray-500 mt-1">${time}</p>
+          </div>
+        </div>
+      `;
+    
+    chatMessages.innerHTML += messageHTML;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+  
+  // Hiển thị thông báo cuộc trò chuyện đã đóng
+  function showThreadClosedMessage() {
+    const messageHTML = `
+      <div id="thread-closed-message" class="bg-red-50 p-3 rounded-lg text-center my-4">
+        <p class="text-red-500">Cuộc trò chuyện đã kết thúc</p>
+      </div>
+    `;
+    
+    chatMessages.insertAdjacentHTML('beforeend', messageHTML);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Vô hiệu hóa form gửi tin nhắn
+    messageInput.disabled = true;
+    document.querySelector('input[type="submit"]').disabled = true;
+  }
+  
+  // Ẩn thông báo cuộc trò chuyện đã đóng
+  function hideThreadClosedMessage() {
+    const threadClosedMessage = document.getElementById('thread-closed-message');
+    if (threadClosedMessage) {
+      threadClosedMessage.remove();
+    }
+    
+    // Kích hoạt lại form gửi tin nhắn
+    messageInput.disabled = false;
+    document.querySelector('input[type="submit"]').disabled = false;
+  }
+  
+  // Cuộn xuống tin nhắn cuối cùng khi tải trang
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+</script>

@@ -7,6 +7,16 @@ class Payment < ApplicationRecord
   validates :status, presence: true
   validates :transaction_id, uniqueness: true, allow_nil: true
 
+  # Ransack configuration
+  def self.ransackable_attributes(auth_object = nil)
+    [ "amount", "status", "transaction_id", "created_at", "updated_at", "booking_id", "payment_method_id" ]
+  end
+
+  # Class method to get payment methods for dropdowns
+  def self.payment_methods_for_select
+    PaymentMethod.for_select
+  end
+
   # Enums
   enum status: {
     pending: 0,

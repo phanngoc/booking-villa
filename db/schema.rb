@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_04_09_151913) do
+ActiveRecord::Schema[7.2].define(version: 2025_04_11_044808) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -35,6 +35,18 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_09_151913) do
     t.index ["villa_id"], name: "index_bookings_on_villa_id"
   end
 
+  create_table "chat_threads", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "status", default: "active"
+    t.string "title"
+    t.boolean "is_unread", default: true
+    t.datetime "last_activity_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status"], name: "index_chat_threads_on_status"
+    t.index ["user_id"], name: "index_chat_threads_on_user_id"
+  end
+
   create_table "members", force: :cascade do |t|
     t.string "email"
     t.string "password_digest"
@@ -43,6 +55,32 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_09_151913) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_members_on_email", unique: true
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.bigint "chat_thread_id", null: false
+    t.text "content", null: false
+    t.string "sender", null: false
+    t.boolean "is_read", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_thread_id"], name: "index_messages_on_chat_thread_id"
+    t.index ["sender"], name: "index_messages_on_sender"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.text "content"
+    t.boolean "is_read", default: false
+    t.string "category"
+    t.datetime "timestamp"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "reference_type"
+    t.bigint "reference_id"
+    t.index ["is_read"], name: "index_notifications_on_is_read"
+    t.index ["reference_type", "reference_id"], name: "index_notifications_on_reference"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "payment_methods", force: :cascade do |t|
@@ -132,6 +170,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_09_151913) do
 
   add_foreign_key "bookings", "users"
   add_foreign_key "bookings", "villas"
+  add_foreign_key "chat_threads", "users"
+  add_foreign_key "messages", "chat_threads"
+  add_foreign_key "notifications", "users"
   add_foreign_key "payments", "bookings"
   add_foreign_key "payments", "payment_methods"
   add_foreign_key "reviews", "bookings"

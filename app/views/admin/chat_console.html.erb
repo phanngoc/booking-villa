@@ -1,0 +1,271 @@
+<!-- Admin Chat Console -->
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6">Bảng điều khiển chat</h1>
+  
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Danh sách phiên chat -->
+    <div class="bg-white rounded-lg shadow-md p-4 md:col-span-1">
+      <h2 class="text-lg font-semibold mb-4">Người dùng đang hoạt động</h2>
+      <div id="active-sessions" class="space-y-2 max-h-[500px] overflow-y-auto">
+        <!-- Session items sẽ được thêm ở đây qua JavaScript -->
+      </div>
+    </div>
+    
+    <!-- Khu vực chat -->
+    <div class="bg-white rounded-lg shadow-md md:col-span-2 flex flex-col h-[600px]">
+      <!-- Header của chat -->
+      <div class="border-b p-4 flex items-center">
+        <div id="current-user-info" class="flex-1">
+          <span class="text-gray-500">Chọn người dùng để bắt đầu chat</span>
+        </div>
+      </div>
+      
+      <!-- Tin nhắn -->
+      <div id="chat-messages" class="flex-1 p-4 overflow-y-auto">
+        <!-- Tin nhắn sẽ được thêm ở đây qua JavaScript -->
+      </div>
+      
+      <!-- Input chat -->
+      <div class="border-t p-4">
+        <div class="flex items-center">
+          <input id="admin-message-input" type="text" placeholder="Nhập tin nhắn..." class="flex-1 rounded-full border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+          <button id="admin-send-button" class="ml-2 px-4 py-2 bg-blue-600 text-white rounded-full disabled:bg-gray-300" disabled>
+            Gửi
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= javascript_import_module_tag "channels" %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const activeSessions = document.getElementById('active-sessions');
+  const chatMessages = document.getElementById('chat-messages');
+  const currentUserInfo = document.getElementById('current-user-info');
+  const adminMessageInput = document.getElementById('admin-message-input');
+  const adminSendButton = document.getElementById('admin-send-button');
+  
+  let currentSessionId = null;
+  let sessions = {};
+  
+  // Kết nối với Admin Chat Channel
+  const adminChatChannel = App.cable.subscriptions.create(
+    {
+      channel: "AdminChatChannel"
+    },
+    {
+      connected() {
+        console.log("Admin đã kết nối với AdminChatChannel");
+      },
+      
+      disconnected() {
+        console.log("Admin đã ngắt kết nối với AdminChatChannel");
+      },
+      
+      received(data) {
+        console.log("Admin nhận dữ liệu:", data);
+        
+        if (data.action === "new_session") {
+          addNewSession(data);
+        } else if (data.action === "new_message") {
+          handleNewMessage(data);
+        } else if (data.action === "session_closed") {
+          handleSessionClosed(data);
+        }
+      }
+    }
+  );
+  
+  // Xử lý khi có phiên chat mới
+  function addNewSession(data) {
+    const sessionId = data.session_id;
+    const userId = data.user_id;
+    const userName = data.user_name;
+    
+    // Thêm vào danh sách phiên nếu chưa tồn tại
+    if (!sessions[sessionId]) {
+      sessions[sessionId] = {
+        id: sessionId,
+        userId: userId,
+        userName: userName,
+        messages: [],
+        status: "active",
+        unread: 0
+      };
+      
+      // Tạo phần tử HTML cho phiên chat
+      const sessionElement = document.createElement('div');
+      sessionElement.id = `session-${sessionId}`;
+      sessionElement.className = 'p-3 rounded cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-between';
+      sessionElement.innerHTML = `
+        <div>
+          <div class="font-medium">${userName}</div>
+          <div class="text-sm text-gray-500 truncate">${userId.startsWith('guest_') ? 'Khách' : 'Đã đăng nhập'}</div>
+        </div>
+        <div class="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center unread-count" style="display: none;">0</div>
+      `;
+      
+      // Thêm sự kiện click để chọn phiên chat
+      sessionElement.addEventListener('click', function() {
+        selectSession(sessionId);
+      });
+      
+      // Thêm vào DOM
+      activeSessions.appendChild(sessionElement);
+    }
+  }
+  
+  // Xử lý khi có tin nhắn mới
+  function handleNewMessage(data) {
+    const sessionId = data.session_id;
+    const message = data.message;
+    
+    // Thêm tin nhắn vào phiên chat
+    if (sessions[sessionId]) {
+      sessions[sessionId].messages.push({
+        content: message,
+        sender_type: data.sender_type,
+        timestamp: data.timestamp
+      });
+      
+      // Nếu đây là phiên chat đang được chọn, hiển thị tin nhắn
+      if (currentSessionId === sessionId) {
+        displayMessage(message, data.sender_type);
+      } else {
+        // Tăng số tin nhắn chưa đọc
+        sessions[sessionId].unread++;
+        const unreadElement = document.querySelector(`#session-${sessionId} .unread-count`);
+        unreadElement.textContent = sessions[sessionId].unread;
+        unreadElement.style.display = 'flex';
+        
+        // Highlight phiên chat có tin nhắn mới
+        const sessionElement = document.getElementById(`session-${sessionId}`);
+        sessionElement.classList.add('bg-blue-50');
+      }
+    }
+  }
+  
+  // Xử lý khi phiên chat đóng
+  function handleSessionClosed(data) {
+    const sessionId = data.session_id;
+    
+    if (sessions[sessionId]) {
+      sessions[sessionId].status = "closed";
+      
+      // Cập nhật giao diện phiên chat
+      const sessionElement = document.getElementById(`session-${sessionId}`);
+      sessionElement.classList.add('opacity-50');
+    }
+  }
+  
+  // Chọn phiên chat
+  function selectSession(sessionId) {
+    currentSessionId = sessionId;
+    const session = sessions[sessionId];
+    
+    // Cập nhật giao diện
+    document.querySelectorAll('#active-sessions > div').forEach(el => {
+      el.classList.remove('bg-blue-100');
+    });
+    const sessionElement = document.getElementById(`session-${sessionId}`);
+    sessionElement.classList.add('bg-blue-100');
+    sessionElement.classList.remove('bg-blue-50');
+    
+    // Đặt số tin nhắn chưa đọc về 0
+    session.unread = 0;
+    const unreadElement = document.querySelector(`#session-${sessionId} .unread-count`);
+    unreadElement.textContent = '0';
+    unreadElement.style.display = 'none';
+    
+    // Cập nhật header
+    currentUserInfo.innerHTML = `
+      <div class="font-medium">${session.userName}</div>
+      <div class="text-sm text-gray-500">${session.userId}</div>
+    `;
+    
+    // Hiển thị tin nhắn của phiên chat
+    chatMessages.innerHTML = '';
+    session.messages.forEach(msg => {
+      displayMessage(msg.content, msg.sender_type);
+    });
+    
+    // Bật input chat
+    adminMessageInput.disabled = false;
+    adminSendButton.disabled = false;
+  }
+  
+  // Hiển thị tin nhắn trong khu vực chat
+  function displayMessage(content, senderType) {
+    let messageHTML = '';
+    
+    if (senderType === 'user') {
+      messageHTML = `
+        <div class="flex items-start mb-4">
+          <div class="py-2 px-3 bg-gray-100 rounded-lg rounded-tl-none">
+            <p class="text-sm text-gray-800">${content}</p>
+          </div>
+        </div>
+      `;
+    } else {
+      messageHTML = `
+        <div class="flex items-start mb-4 justify-end">
+          <div class="py-2 px-3 bg-blue-600 text-white rounded-lg rounded-tr-none">
+            <p class="text-sm">${content}</p>
+          </div>
+        </div>
+      `;
+    }
+    
+    chatMessages.insertAdjacentHTML('beforeend', messageHTML);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+  
+  // Gửi tin nhắn từ admin
+  function sendAdminMessage() {
+    const message = adminMessageInput.value.trim();
+    if (message && currentSessionId) {
+      const session = sessions[currentSessionId];
+      
+      // Gửi tin nhắn qua WebSocket
+      adminChatChannel.perform('admin_reply', {
+        session_id: currentSessionId,
+        content: message,
+        admin_id: '<%= current_user&.id || "system" %>',
+        user_id: session.userId
+      });
+      
+      // Hiển thị tin nhắn trên giao diện
+      displayMessage(message, 'admin');
+      
+      // Thêm vào danh sách tin nhắn của phiên chat
+      sessions[currentSessionId].messages.push({
+        content: message,
+        sender_type: 'admin',
+        timestamp: Math.floor(Date.now() / 1000)
+      });
+      
+      // Xóa input
+      adminMessageInput.value = '';
+    }
+  }
+  
+  // Thêm sự kiện submit cho form chat
+  adminSendButton.addEventListener('click', sendAdminMessage);
+  adminMessageInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      sendAdminMessage();
+    }
+  });
+  
+  // Demo data cho phiên chat (có thể xóa khi có dữ liệu thực)
+  setTimeout(() => {
+    // Giả lập các phiên chat
+    addNewSession({ session_id: '1', user_id: '1', user_name: 'Nguyễn Văn A' });
+    addNewSession({ session_id: '2', user_id: '2', user_name: 'Trần Thị B' });
+    addNewSession({ session_id: '3', user_id: 'guest_123', user_name: 'Khách' });
+  }, 1000);
+});
+</script> 

@@ -1,0 +1,220 @@
+<!-- Admin Chat Show Template - Loaded into the right panel -->
+<div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+  <h5 class="mb-0">
+    <i class="bi bi-person-circle me-2"></i>
+    <%= @chat_thread.user.email rescue "User ##{@chat_thread.user_id}" %>
+    <% if @chat_thread.status == "closed" %>
+      <span class="badge bg-secondary ms-2">Đã đóng</span>
+    <% end %>
+  </h5>
+  <div>
+    <% if @chat_thread.status == "active" %>
+      <%= button_to close_admin_chat_path(@chat_thread), method: :patch, class: "btn btn-sm btn-danger", data: { confirm: "Bạn có chắc chắn muốn đóng cuộc trò chuyện này không?" } do %>
+        <i class="bi bi-x-circle"></i> Đóng
+      <% end %>
+    <% else %>
+      <%= button_to reopen_admin_chat_path(@chat_thread), method: :patch, class: "btn btn-sm btn-success" do %>
+        <i class="bi bi-arrow-clockwise"></i> Mở lại
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<div class="card-body p-0 d-flex flex-column">
+  <!-- Thông tin người dùng -->
+  <div class="bg-light border-bottom p-3">
+    <div class="row">
+      <div class="col-md-6">
+        <h6>Thông tin người dùng</h6>
+        <p class="text-muted mb-0 small">
+          ID: <%= @chat_thread.user_id %><br>
+          <% if @chat_thread.title.present? %>
+            <%= @chat_thread.title %><br>
+          <% end %>
+          Bắt đầu: <%= @chat_thread.created_at.strftime("%d/%m/%Y %H:%M") %>
+        </p>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <p class="text-muted mb-0 small">
+          Tổng tin nhắn: <%= @messages.count %><br>
+          Hoạt động cuối: <%= time_ago_in_words(@chat_thread.last_activity_at || @chat_thread.created_at) %> trước
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Lịch sử tin nhắn -->
+  <div class="chat-messages p-3" id="chat-history" style="height: 400px; overflow-y: auto;">
+    <% if @messages.any? %>
+      <% @messages.each do |message| %>
+        <% if message.by_admin? %>
+          <!-- Tin nhắn từ admin -->
+          <div class="d-flex justify-content-end mb-3">
+            <div class="bg-primary text-white rounded p-3" style="max-width: 75%;">
+              <p class="mb-1"><%= message.content %></p>
+              <small class="d-block text-end opacity-75">
+                Admin - <%= message.created_at.strftime("%d/%m/%Y %H:%M") %>
+              </small>
+            </div>
+          </div>
+        <% else %>
+          <!-- Tin nhắn từ người dùng -->
+          <div class="d-flex justify-content-start mb-3">
+            <div class="bg-light rounded p-3" style="max-width: 75%;">
+              <p class="mb-1"><%= message.content %></p>
+              <small class="d-block text-end text-muted">
+                User - <%= message.created_at.strftime("%d/%m/%Y %H:%M") %>
+                <% unless message.is_read? %>
+                  <span class="badge bg-info ms-1">
+                    Chưa đọc
+                  </span>
+                <% end %>
+              </small>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    <% else %>
+      <div class="text-center py-5">
+        <i class="bi bi-chat-square" style="font-size: 3rem; color: #e9ecef;"></i>
+        <p class="text-muted mt-3">Chưa có tin nhắn nào</p>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Form trả lời -->
+  <div class="border-top p-3 mt-auto">
+    <% if @chat_thread.status == "active" %>
+      <%= form_with(url: create_message_chats_path, method: :post, id: "admin-reply-form", class: "d-flex") do |f| %>
+        <%= f.hidden_field :chat_thread_id, value: @chat_thread.id %>
+        <div class="flex-grow-1 me-2">
+          <%= f.text_field :content, placeholder: "Nhập tin nhắn trả lời...", class: "form-control", required: true %>
+        </div>
+        <%= f.button type: "submit", class: "btn btn-primary" do %>
+          <i class="bi bi-send"></i> Gửi
+        <% end %>
+      <% end %>
+    <% else %>
+      <div class="alert alert-secondary mb-0 text-center">
+        <i class="bi bi-lock"></i> Cuộc trò chuyện đã đóng. Không thể gửi tin nhắn mới.
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<%= javascript_import_module_tag "channels" %>
+
+<!-- Hidden fields for JS -->  
+<input type="hidden" id="current-thread-id" value="<%= @thread_id %>">
+<input type="hidden" id="current-admin-id" value="<%= @admin_id %>">
+
+<script>
+  // Cuộn xuống tin nhắn cuối cùng
+  const chatHistory = document.getElementById('chat-history');
+  if (chatHistory) {
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+  }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    const threadId = document.getElementById('current-thread-id').value;
+    const adminId = document.getElementById('current-admin-id').value;
+    const chatForm = document.getElementById('admin-reply-form');
+    const inputField = chatForm ? chatForm.querySelector('input[name="content"]') : null;
+    
+    // Import và kết nối với WebSocket channel
+    import("<%= asset_path('channels/consumer.js') %>").then(module => {
+      const consumer = module.default;
+      
+      // Kết nối đến ChatThreadChannel với chat_thread_id cụ thể
+      const chatChannel = consumer.subscriptions.create({
+        channel: "ChatThreadChannel",
+        chat_thread_id: threadId
+      }, {
+        connected() {
+          console.log(`Đã kết nối với ChatThreadChannel cho thread ${threadId}`);
+        },
+        
+        disconnected() {
+          console.log(`Đã ngắt kết nối từ ChatThreadChannel cho thread ${threadId}`);
+        },
+        
+        received(data) {
+          console.log("Nhận dữ liệu từ channel:", data);
+          
+          if (data.action === "new_message") {
+            // Thêm tin nhắn mới vào giao diện
+            appendMessage(data);
+            
+            // Cuộn xuống dưới cùng
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+          } else if (data.action === "thread_closed") {
+            // Làm mới trang để cập nhật trạng thái
+            window.location.reload();
+          } else if (data.action === "thread_reopened") {
+            // Làm mới trang để cập nhật trạng thái
+            window.location.reload();
+          }
+        }
+      });
+      
+      // Xử lý gửi tin nhắn từ admin
+      if (chatForm) {
+        chatForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const content = inputField.value.trim();
+          if (!content) return;
+          
+          // Gửi tin nhắn qua WebSocket thay vì form submission
+          chatChannel.perform('send_message', {
+            chat_thread_id: threadId,
+            content: content,
+            sender: 'admin',
+            admin_id: adminId
+          });
+          
+          // Xóa nội dung input sau khi gửi
+          inputField.value = '';
+          inputField.focus();
+        });
+      }
+      
+      // Hàm hiển thị tin nhắn mới
+      function appendMessage(data) {
+        const messageContainer = document.createElement('div');
+        const isAdmin = data.sender === 'admin';
+        const timestamp = new Date(data.timestamp * 1000).toLocaleString('vi-VN', {
+          year: 'numeric', month: 'numeric', day: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        });
+        
+        if (isAdmin) {
+          // Tin nhắn từ admin
+          messageContainer.className = 'd-flex justify-content-end mb-3';
+          messageContainer.innerHTML = `
+            <div class="bg-primary text-white rounded p-3" style="max-width: 75%;">
+              <p class="mb-1">${data.content}</p>
+              <small class="d-block text-end opacity-75">
+                Admin - ${timestamp}
+              </small>
+            </div>
+          `;
+        } else {
+          // Tin nhắn từ người dùng
+          messageContainer.className = 'd-flex justify-content-start mb-3';
+          messageContainer.innerHTML = `
+            <div class="bg-light rounded p-3" style="max-width: 75%;">
+              <p class="mb-1">${data.content}</p>
+              <small class="d-block text-end text-muted">
+                User - ${timestamp}
+              </small>
+            </div>
+          `;
+        }
+        
+        // Thêm vào container
+        chatHistory.appendChild(messageContainer);
+      }
+    });
+  });
+</script>

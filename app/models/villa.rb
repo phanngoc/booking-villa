@@ -5,6 +5,11 @@ class Villa < ApplicationRecord
   validates :price, presence: true, numericality: { greater_than: 0 }
   validates :status, presence: true
 
+  # Ransack configuration
+  def self.ransackable_attributes(auth_object = nil)
+    [ "name", "address", "price", "status", "created_at", "updated_at", "id" ]
+  end
+
   # Enums
   enum status: {
     available: 0,
