@@ -1,0 +1,65 @@
+<%= form_with(model: [:admin, @villa], local: true) do |form| %>
+  <% if @villa.errors.any? %>
+    <div class="alert alert-danger">
+      <h4><%= pluralize(@villa.errors.count, "error") %> prohibited this villa from being saved:</h4>
+      <ul>
+        <% @villa.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= form.label :name, "Tên Villa", class: "form-label" %>
+    <%= form.text_field :name, class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :address, "Địa chỉ", class: "form-label" %>
+    <%= form.text_area :address, class: "form-control", rows: 3 %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :price, "Giá", class: "form-label" %>
+    <%= form.number_field :price, class: "form-control", step: 1 %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :status, "Trạng thái", class: "form-label" %>
+    <%= form.select :status, Villa.statuses.keys.map { |s| [s.titleize, s] }, {}, class: "form-select" %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :rooms, "Số phòng ngủ", class: "form-label" %>
+    <%= form.number_field :rooms, class: "form-control", step: 1 %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :bathrooms, "Số phòng tắm", class: "form-label" %>
+    <%= form.number_field :bathrooms, class: "form-control", step: 1 %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :max_guests, "Số khách tối đa", class: "form-label" %>
+    <%= form.number_field :max_guests, class: "form-control", step: 1 %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :description, "Mô tả", class: "form-label" %>
+    <%= form.text_area :description, class: "form-control", rows: 5 %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :amenities_list, "Tiện ích", class: "form-label" %>
+    <%= form.collection_select :amenities_list, Amenity.all, :id, :name,
+      { multiple: true, selected: @villa.amenities_list },
+      { class: "form-select", size: 5 }
+    %>
+    <small class="text-muted">Chọn nhiều tiện ích bằng cách giữ phím Ctrl/Cmd</small>
+  </div>
+
+  <div class="d-flex justify-content-end">
+    <%= form.submit class: "btn btn-primary" %>
+  </div>
+<% end %>

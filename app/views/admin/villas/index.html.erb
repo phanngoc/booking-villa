@@ -1,0 +1,64 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Danh sách Villa</h2>
+    <%= link_to 'Tạo mới Villa', new_admin_villa_path, class: 'btn btn-primary' %>
+  </div>
+
+  <%= search_form_for @q, url: admin_villas_path, method: :get do |f| %>
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <%= f.label :name_cont, 'Tên Villa', class: "form-label" %>
+        <%= f.search_field :name_cont, class: "form-control" %>
+      </div>
+      <div class="col-md-4">
+        <%= f.label :address_cont, 'Địa chỉ', class: "form-label" %>
+        <%= f.search_field :address_cont, class: "form-control" %>
+      </div>
+      <div class="col-md-4">
+        <%= f.label :price_gteq, 'Giá từ', class: "form-label" %>
+        <%= f.number_field :price_gteq, class: "form-control", step: 1 %>
+      </div>
+    </div>
+    <div class="text-end">
+      <%= f.submit 'Tìm kiếm', class: 'btn btn-primary' %>
+    </div>
+  <% end %>
+
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tên</th>
+          <th>Địa chỉ</th>
+          <th>Giá</th>
+          <th>Phòng ngủ</th>
+          <th>Phòng tắm</th>
+          <th>Trạng thái</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @villas.each do |villa| %>
+          <tr>
+            <td><%= villa.id %></td>
+            <td><%= villa.name %></td>
+            <td><%= villa.address %></td>
+            <td><%= number_to_currency(villa.price, unit: '₫', delimiter: ',') %></td>
+            <td><%= villa.rooms %></td>
+            <td><%= villa.bathrooms %></td>
+            <td>
+              <%= status_tag(villa.status) %>
+            </td>
+            <td>
+              <%= link_to 'Sửa', edit_admin_villa_path(villa), class: 'btn btn-sm btn-warning' %>
+              <%= link_to 'Metafields', admin_villa_metafields_path(villa), class: 'btn btn-sm btn-info ms-1' %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <%= paginate @villas %>
+</div>

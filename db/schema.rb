@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_04_11_044808) do
+ActiveRecord::Schema[7.2].define(version: 2025_04_13_104210) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -153,6 +153,21 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_11_044808) do
     t.index ["villa_id"], name: "index_villa_amenities_on_villa_id"
   end
 
+  create_table "villa_metafields", force: :cascade do |t|
+    t.bigint "villa_id", null: false
+    t.string "namespace", null: false
+    t.string "key", null: false
+    t.string "value_type", default: "string"
+    t.text "value"
+    t.boolean "visible_on_frontend", default: true
+    t.integer "position", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["namespace", "key"], name: "index_villa_metafields_on_namespace_and_key"
+    t.index ["villa_id", "namespace", "key"], name: "index_villa_metafields_on_villa_id_and_namespace_and_key", unique: true
+    t.index ["villa_id"], name: "index_villa_metafields_on_villa_id"
+  end
+
   create_table "villas", force: :cascade do |t|
     t.string "name"
     t.text "address"
@@ -180,4 +195,5 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_11_044808) do
   add_foreign_key "reviews", "villas"
   add_foreign_key "villa_amenities", "amenities"
   add_foreign_key "villa_amenities", "villas"
+  add_foreign_key "villa_metafields", "villas"
 end

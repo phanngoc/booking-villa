@@ -16,6 +16,12 @@ Rails.application.routes.draw do
     resources :users
     resources :filter_fields
     resources :bookings
+
+    # Routes cho quản lý metafields
+    resources :villas do
+      resources :metafields, controller: "villa_metafields"
+    end
+
     resources :chats, only: [ :index, :show ] do
       collection do
         post :receive_message
