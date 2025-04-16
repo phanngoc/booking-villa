@@ -1,0 +1,112 @@
+<%= form_with(model: [:admin, @villa, @metafield], local: true) do |form| %>
+  <% if @metafield.errors.any? %>
+    <div class="alert alert-danger">
+      <h5><%= pluralize(@metafield.errors.count, "lỗi") %> xảy ra:</h5>
+      <ul>
+        <% @metafield.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <%= form.label :namespace, "Namespace", class: "form-label" %>
+      <%= form.text_field :namespace, class: "form-control", placeholder: "Ví dụ: specs, location_details, highlights..." %>
+      <div class="form-text">
+        Namespace giúp nhóm các thuộc tính liên quan lại với nhau
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <%= form.label :key, "Key", class: "form-label" %>
+      <%= form.text_field :key, class: "form-control", placeholder: "Ví dụ: beach_distance, pool_size, pet_friendly..." %>
+      <div class="form-text">
+        Key là tên cụ thể của thuộc tính
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <%= form.label :value_type, "Loại giá trị", class: "form-label" %>
+      <%= form.select :value_type, VillaMetafield::VALUE_TYPES, {}, { class: "form-select", id: "value-type-select" } %>
+      <div class="form-text">
+        Loại dữ liệu của thuộc tính
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <%= form.label :value, "Giá trị", class: "form-label" %>
+      <div id="string-value-field">
+        <%= form.text_field :value, class: "form-control" %>
+      </div>
+      <div id="text-value-field" style="display:none;">
+        <%= form.text_area :value, rows: 5, class: "form-control" %>
+      </div>
+      <div id="boolean-value-field" style="display:none;">
+        <%= form.select :value, [["True", "true"], ["False", "false"]], {}, { class: "form-select" } %>
+      </div>
+      <div class="form-text">
+        Giá trị của thuộc tính
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <%= form.label :visible_on_frontend, "Hiển thị trên Frontend", class: "form-label" %>
+      <%= form.select :visible_on_frontend, [["Có", true], ["Không", false]], {}, { class: "form-select" } %>
+      <div class="form-text">
+        Quyết định thuộc tính có hiển thị trên giao diện người dùng không
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <%= form.label :position, "Vị trí", class: "form-label" %>
+      <%= form.number_field :position, class: "form-control", min: 0 %>
+      <div class="form-text">
+        Thứ tự hiển thị của thuộc tính (số nhỏ hơn hiển thị trước)
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <%= form.submit "Lưu Metafield", class: "btn btn-primary" %>
+    <%= link_to "Hủy", admin_villa_metafields_path(@villa), class: "btn btn-secondary" %>
+  </div>
+<% end %>
+
+<script type="text/javascript">
+  document.addEventListener('DOMContentLoaded', function() {
+    const valueTypeSelect = document.getElementById('value-type-select');
+    const stringValueField = document.getElementById('string-value-field');
+    const textValueField = document.getElementById('text-value-field');
+    const booleanValueField = document.getElementById('boolean-value-field');
+    
+    function updateValueField() {
+      const selectedType = valueTypeSelect.value;
+      
+      // Hide all fields first
+      stringValueField.style.display = 'none';
+      textValueField.style.display = 'none';
+      booleanValueField.style.display = 'none';
+      
+      // Show the appropriate field based on the selected type
+      if (selectedType === 'text' || selectedType === 'json') {
+        textValueField.style.display = 'block';
+      } else if (selectedType === 'boolean') {
+        booleanValueField.style.display = 'block';
+      } else {
+        stringValueField.style.display = 'block';
+      }
+    }
+    
+    // Initialize on page load
+    updateValueField();
+    
+    // Update when selection changes
+    valueTypeSelect.addEventListener('change', updateValueField);
+  });
+</script>

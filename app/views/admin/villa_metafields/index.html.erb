@@ -1,0 +1,79 @@
+<h1>Quản lý Metafields của Villa: <%= @villa.name %></h1>
+
+<div class="mb-4">
+  <%= link_to "Thêm Metafield mới", new_admin_villa_metafield_path(@villa), class: "btn btn-primary" %>
+  <%= link_to "Quay lại Villa", admin_villa_path(@villa), class: "btn btn-secondary" %>
+</div>
+
+<% if @metafields.any? %>
+  <% @namespaces.each do |namespace| %>
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><%= namespace.humanize %></h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">Key</th>
+                <th scope="col">Loại giá trị</th>
+                <th scope="col">Giá trị</th>
+                <th scope="col">Hiển thị Frontend</th>
+                <th scope="col">Vị trí</th>
+                <th scope="col" class="text-end">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @metafields.where(namespace: namespace).each do |metafield| %>
+                <tr>
+                  <td><%= metafield.key %></td>
+                  <td><%= metafield.value_type %></td>
+                  <td>
+                    <% if metafield.value_type == 'json' %>
+                      <pre class="mb-0"><%= JSON.pretty_generate(JSON.parse(metafield.value)) rescue metafield.value %></pre>
+                    <% else %>
+                      <%= metafield.typed_value %>
+                    <% end %>
+                  </td>
+                  <td><%= metafield.visible_on_frontend ? 'Có' : 'Không' %></td>
+                  <td><%= metafield.position %></td>
+                  <td class="text-end">
+                    <%= link_to "Sửa", edit_admin_villa_metafield_path(@villa, metafield), class: "btn btn-sm btn-warning" %>
+                    <%= button_to "Xóa", admin_villa_metafield_path(@villa, metafield), method: :delete, class: "btn btn-sm btn-danger", data: { confirm: "Bạn có chắc chắn muốn xóa metafield này?" } %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  <% end %>
+<% else %>
+  <div class="alert alert-info">
+    Chưa có metafields nào được tạo cho villa này. Hãy tạo metafield mới để bổ sung thêm thuộc tính cho villa.
+  </div>
+<% end %>
+
+<div class="card mt-4">
+  <div class="card-header">
+    <h5>Hướng dẫn sử dụng Metafields</h5>
+  </div>
+  <div class="card-body">
+    <p>Metafields cho phép bạn thêm các thuộc tính tùy chỉnh cho villa mà không cần thay đổi cấu trúc cơ sở dữ liệu. Có thể sử dụng cho:</p>
+    <ul>
+      <li><strong>Namespace:</strong> Nhóm các thuộc tính liên quan (ví dụ: location_details, specs, highlights...)</li>
+      <li><strong>Key:</strong> Tên của thuộc tính (ví dụ: beach_distance, floor_area, pet_friendly...)</li>
+      <li><strong>Loại giá trị:</strong> Kiểu dữ liệu của thuộc tính (string, integer, decimal, boolean, json, text, date, datetime)</li>
+      <li><strong>Hiển thị Frontend:</strong> Quyết định thuộc tính có được hiển thị công khai cho người dùng hay không</li>
+      <li><strong>Vị trí:</strong> Thứ tự hiển thị của thuộc tính (số nhỏ hơn hiển thị trước)</li>
+    </ul>
+    <p><strong>Ví dụ:</strong></p>
+    <ul>
+      <li>Namespace: <code>location_details</code>, Key: <code>beach_distance</code>, Giá trị: <code>500</code>, Loại: <code>integer</code> - Khoảng cách đến bãi biển (mét)</li>
+      <li>Namespace: <code>highlights</code>, Key: <code>pet_friendly</code>, Giá trị: <code>true</code>, Loại: <code>boolean</code> - Villa cho phép mang thú cưng</li>
+      <li>Namespace: <code>specs</code>, Key: <code>amenity_details</code>, Loại: <code>json</code> - Chi tiết các tiện nghi dưới dạng JSON</li>
+    </ul>
+  </div>
+</div>
