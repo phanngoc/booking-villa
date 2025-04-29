@@ -68,7 +68,7 @@ gem "bootstrap5-kaminari-views" # Bootstrap 5 theme for Kaminari
 gem "ransack", "~> 4.1" # Search functionality
 
 # Gem cho thanh toán tiền điện tử
-gem "rqrcode", "~> 2.1" # Tạo QR code
+gem "rqrcode", "~> 3.1" # Tạo QR code
 gem "httparty", "~> 0.21.0" # HTTP client đơn giản
 
 # Thêm các gem cho SSO
