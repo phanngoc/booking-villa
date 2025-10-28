@@ -61,7 +61,7 @@ end
 
 gem "devise", "~> 4.9"
 gem "sidekiq", "~> 7.0"
-gem "tailwindcss-rails", "~> 4.2"
+gem "tailwindcss-rails", "~> 4.4"
 gem "dotenv-rails"
 gem "kaminari", "~> 1.2" # Phân trang
 gem "bootstrap5-kaminari-views" # Bootstrap 5 theme for Kaminari
